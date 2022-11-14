@@ -11,7 +11,7 @@ SquatM tracks can be composed in 1Tracker (https://shiru.untergrund.net/software
 
 This still needs heavily optimizing.  It does not play back at full speed at present.
 
-SSD file for emulators/hardware: https://github.com/NegativeCharge/ca65-SquatM-Player/blob/master/SquatM_Beeper_Engine.ssd?raw=true
+SSD file for emulators/hardware: https://github.com/NegativeCharge/BBC-Micro-SquatM-Player/blob/master/SquatM_Beeper_Engine.ssd?raw=true
 
 **NOTE:**
 
