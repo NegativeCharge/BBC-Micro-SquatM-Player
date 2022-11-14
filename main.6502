@@ -4,28 +4,28 @@
 ;Ported to the BBC Micro by Negative Charge 11'22
 
 \ Constants
-OSBYTE                  = &FFF4
-OSWRCH                  = &FFEE
-SHEILABASE              = &FE00             ; System peripherals
-SYSVIA_DDRA             = SHEILABASE + &43  ; Data direction register A
-SYSVIA_ORAS             = SHEILABASE + &4F  ; Same as REGA but with no handshake I/O
-SYSVIA_REGB             = SHEILABASE + &40  ; Port B I/O
+OSBYTE                  = $FFF4
+OSWRCH                  = $FFEE
+SHEILABASE              = $FE00             ; System peripherals
+SYSVIA_DDRA             = SHEILABASE + $43  ; Data direction register A
+SYSVIA_ORAS             = SHEILABASE + $4F  ; Same as REGA but with no handshake I/O
+SYSVIA_REGB             = SHEILABASE + $40  ; Port B I/O
 
 DEBUG                   = TRUE
 NTSC                    = FALSE
 
-OP_NOP                  = &EA
-OP_ROL_A                = &2A
+OP_NOP                  = $EA
+OP_ROL_A                = $2A
 
 \ Zero Page
-ORG     &6F
-GUARD   &9F
+ORG     $6F
+GUARD   $9F
 
 .vars_start
 .loop_ptr          SKIP 2
 .pattern_ptr       SKIP 2
 .sample_ptr        SKIP 2
-.sample_mask       SKIP 1        ;&00 or &ff
+.sample_mask       SKIP 1        ;$00 or $ff
 .sample_bit        SKIP 1
 .sample_out        SKIP 1
 .row_length        SKIP 1
@@ -55,8 +55,8 @@ GUARD   &5800
 .start
     
     ; Set up audio
-    lda    #0
-    sta    &2cd
+    lda     #0
+    sta     &2cd
 
     ; System VIA port A to all outputs
     lda     #%11111111
@@ -68,7 +68,7 @@ GUARD   &5800
 
     ; Zero volumes on all SN76489 channels, just in case anything already playing
     lda     #%11111111
-    jsr     sound_write_slow ; Channel 3 (Noise)
+    jsr     sound_write_slow                                ; Channel 3 (Noise)
     lda     #%11011111
     jsr     sound_write_slow ; Channel 2
     lda     #%10111111
@@ -82,8 +82,32 @@ GUARD   &5800
     lda     #%00000000
     jsr     sound_write_slow
 
+    lda 	#143
+	ldx 	#12
+	ldy 	#$FF
+	jsr 	OSBYTE                                          ; Claim NMI
+
+    lda     #140
+    jsr     OSBYTE                                          ; Select TAPE
+    lda     #3
+    sta     &258                                            ; *FX200,3 - clear memory on Break
+
+	lda 	#$40
+	sta 	$D00                                            ; Store RTI as NMI routine
+
     sei
-    
+
+    LDA     $FFB7
+    sta     $FD
+    lda     $FFB8
+    sta     $FE                                             ; (&FD)=>default vector table
+    ldy     #6
+    lda     ($FD),Y
+    sta     $204                                            ; Set IRQ1V to default IRQ2V -> LDA &FC,RTI
+    iny
+    lda     ($FD),Y
+    sta     $205
+
     lda     #LO(music_data)
     ldx     #HI(music_data)
 
@@ -126,7 +150,7 @@ GUARD   &5800
 .play_loop
 
     ldy     #1
-    lda     (pattern_ptr),y        ;duration of the row (0=loop), bit 7 percussion
+    lda     (pattern_ptr),y    ;duration of the row (0=loop), bit 7 percussion
     bne     no_loop
     
 .return_loop
@@ -142,7 +166,7 @@ GUARD   &5800
     sta     row_length
     
     dey
-    lda     (pattern_ptr),y        ;flags DDDN4321 (Drum, Noise, 1-4 channel update)
+    lda     (pattern_ptr),y    ;flags DDDN4321 (Drum, Noise, 1-4 channel update)
     iny
     iny
     sta     row_flags
