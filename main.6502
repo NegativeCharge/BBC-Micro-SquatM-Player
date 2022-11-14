@@ -11,7 +11,7 @@ SYSVIA_DDRA             = SHEILABASE + $43  ; Data direction register A
 SYSVIA_ORAS             = SHEILABASE + $4F  ; Same as REGA but with no handshake I/O
 SYSVIA_REGB             = SHEILABASE + $40  ; Port B I/O
 
-DEBUG                   = TRUE
+DEBUG                   = FALSE
 NTSC                    = FALSE
 
 OP_NOP                  = $EA
@@ -70,11 +70,11 @@ GUARD   &5800
     lda     #%11111111
     jsr     sound_write_slow                                ; Channel 3 (Noise)
     lda     #%11011111
-    jsr     sound_write_slow ; Channel 2
+    jsr     sound_write_slow                                ; Channel 2
     lda     #%10111111
-    jsr     sound_write_slow ; Channel 1
+    jsr     sound_write_slow                                ; Channel 1
     lda     #%10011111
-    jsr     sound_write_slow ; Channel 0
+    jsr     sound_write_slow                                ; Channel 0
 
     ; Period to 1 on tone channel 0
     lda     #%10000001
@@ -97,7 +97,7 @@ GUARD   &5800
 
     sei
 
-    LDA     $FFB7
+    lda     $FFB7
     sta     $FD
     lda     $FFB8
     sta     $FE                                             ; (&FD)=>default vector table
@@ -138,7 +138,7 @@ GUARD   &5800
     iny
     sta     loop_ptr+0
     lda     (pattern_ptr),y
-    sta        loop_ptr+1
+    sta     loop_ptr+1
     
     lda     pattern_ptr+0
     clc
@@ -272,7 +272,7 @@ GUARD   &5800
     sta     noise_add+1
     sta     noise_acc+1
     
-    ldx     #<(226*64*2/121)    ;noise duration, takes as long as inner sound loop
+    ldx     #<(226*64*2/121)   ;noise duration, takes as long as inner sound loop
     lda     #>(226*64*2/121)
     sta     noise_cnt
     
@@ -451,7 +451,7 @@ IF DEBUG
     jsr     COLOR4
 ENDIF
 
-    JSR     CONSOL             ;6    output sound bit (47 - Inner)
+    jsr     CONSOL             ;6    output sound bit (47 - Inner)
 
 IF NTSC
     nop                        ;2    to make pitch and speed match between PAL/NTSC
@@ -527,22 +527,22 @@ ENDIF
 
 ; Write data to sound chip then add processing delay
 .sound_write_slow
-    sta     SYSVIA_ORAS        ; Write reg/data to SN76489
+    sta     SYSVIA_ORAS        ;4 Write reg/data to SN76489
 
-    lda     #%00000000
-    sta     SYSVIA_REGB
+    lda     #%00000000         ;2
+    sta     SYSVIA_REGB        ;4 
 
     ; Sound write held low for 8us
     ; Seems to work at 6us, not 5us on an issue 3 beeb
-    nop
-    nop
-    nop
-    nop
+    nop                        ;2
+    nop                        ;2
+    nop                        ;2
+    nop                        ;2
 
-    lda     #%00001000
-    sta     SYSVIA_REGB
+    lda     #%00001000         ;2
+    sta     SYSVIA_REGB        ;4
 
-    rts
+    rts                        ;6
 
 .sample_list
 
@@ -554,7 +554,7 @@ ENDIF
     equw     sample_6
     equw     sample_7
 
-    INCLUDE "tracks\h0ffman.track.6502"
+    INCLUDE "tracks\lets_go.track.6502"
 
 .end
 
