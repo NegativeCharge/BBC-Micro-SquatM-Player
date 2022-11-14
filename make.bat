@@ -1,0 +1,1 @@
+@BeebAsm.exe -i .\main.6502 -do .\SquatM_Beeper_Engine.ssd -opt 3
