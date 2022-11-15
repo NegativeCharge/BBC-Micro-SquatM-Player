@@ -18,8 +18,8 @@ OP_NOP                  = $EA
 OP_ROL_A                = $2A
 
 \ Zero Page
-ORG     $6F
-GUARD   $9F
+ORG     $5F
+GUARD   $8F
 
 .vars_start
 .loop_ptr          SKIP 2
@@ -53,6 +53,24 @@ ORG     &1100
 GUARD   &5800
 
 .start
+
+; Write data to sound chip then add processing delay
+MACRO sound_write_slow
+    sta     SYSVIA_ORAS        ;4 Write reg/data to SN76489
+
+    lda     #%00000000         ;2
+    sta     SYSVIA_REGB        ;4 
+
+    ; Sound write held low for 8us
+    ; Seems to work at 6us, not 5us on an issue 3 beeb
+    nop                        ;2
+    nop                        ;2
+    nop                        ;2
+    nop                        ;2
+
+    lda     #%00001000         ;2
+    sta     SYSVIA_REGB        ;4
+ENDMACRO
     
     ; Set up audio
     lda     #0
@@ -65,22 +83,6 @@ GUARD   &5800
     ; Keyboard to auto-scan
     lda     #%00001011
     sta     SYSVIA_REGB
-
-    ; Zero volumes on all SN76489 channels, just in case anything already playing
-    lda     #%11111111
-    jsr     sound_write_slow                                ; Channel 3 (Noise)
-    lda     #%11011111
-    jsr     sound_write_slow                                ; Channel 2
-    lda     #%10111111
-    jsr     sound_write_slow                                ; Channel 1
-    lda     #%10011111
-    jsr     sound_write_slow                                ; Channel 0
-
-    ; Period to 1 on tone channel 0
-    lda     #%10000001
-    jsr     sound_write_slow ; Channel 0
-    lda     #%00000000
-    jsr     sound_write_slow
 
     lda 	#143
 	ldx 	#12
@@ -107,6 +109,22 @@ GUARD   &5800
     iny
     lda     ($FD),Y
     sta     $205
+
+    ; Zero volumes on all SN76489 channels, just in case anything already playing
+    lda     #%11111111
+    sound_write_slow                                ; Channel 3 (Noise)
+    lda     #%11011111
+    sound_write_slow                                ; Channel 2
+    lda     #%10111111
+    sound_write_slow                                ; Channel 1
+    lda     #%10011111
+    sound_write_slow                                ; Channel 0
+
+    ; Period to 1 on tone channel 0
+    lda     #%10000001
+    sound_write_slow                                ; Channel 0
+    lda     #%00000000
+    sound_write_slow
 
     lda     #LO(music_data)
     ldx     #HI(music_data)
@@ -265,15 +283,15 @@ GUARD   &5800
     tya
     pha
     
-    lda     #<2174             ;utz's rand seed
+    lda     #LO(2174)             ;utz's rand seed
     sta     noise_add+0
     sta     noise_acc+0
-    lda     #>2174
+    lda     #HI(2174)
     sta     noise_add+1
     sta     noise_acc+1
     
-    ldx     #<(219*64*2/114)   ;noise duration, takes as long as inner sound loop
-    lda     #>(219*64*2/114)
+    ldx     #LO(211*64*2/106)   ;noise duration, takes as long as inner sound loop
+    lda     #HI(211*64*2/106)
     sta     noise_cnt
     
 .noise_loop
@@ -316,10 +334,10 @@ ENDIF
     lda     #$00               ;2
     jmp     L5                 ;3
 .L4
-    lda     #$ff               ;2
+    lda     #$0f               ;2
     nop                        ;2 dummy
 .L5
-    jsr     CONSOL             ;6    output sound bit (40 Inner)
+    jsr     CONSOL             ;6    output sound bit (32 Inner)
 
     txa                        ;2
     bne     L6                 ;2/3
@@ -333,7 +351,7 @@ IF NTSC
 ENDIF
 
     dex                        ;2
-    jmp     noise_loop         ;3=114t
+    jmp     noise_loop         ;3=106t
     
 .noise_done
 
@@ -363,7 +381,7 @@ ENDIF
     lda     (sample_ptr),y     ;5+
     and     sample_bit         ;3
     beq     L8                 ;2/3
-    lda     #$ff               ;2
+    lda     #$0f               ;2
     jmp     L9                 ;3
 .L8
     nop                        ;2
@@ -442,7 +460,7 @@ ENDIF
 .L10
     adc     #$ff               ;2
     sta     ch_acc             ;3
-    lda     #$ff               ;2
+    lda     #$0f               ;2
 .L11
 
     ora     sample_out         ;3
@@ -451,14 +469,14 @@ IF DEBUG
     jsr     COLOR4
 ENDIF
 
-    jsr     CONSOL             ;6    output sound bit (40 - Inner)
+    jsr     CONSOL             ;6    output sound bit (32 - Inner)
 
 IF NTSC
     nop                        ;2    to make pitch and speed match between PAL/NTSC
 ENDIF
 
     dex                        ;2
-    bne     sound_loop         ;2/3=219t
+    bne     sound_loop         ;2/3=211t
     
     dey                        ;last byte of a 64/8 byte sample packet is #80 means it was the last packet
     lda     (sample_ptr),y
@@ -486,26 +504,9 @@ ENDIF
     jmp     play_loop
 
 .CONSOL                  
-    lsr     a                  ;2                     
-    lsr     a                  ;2 
-    lsr     a                  ;2
-    lsr     a                  ;2 Only 4-bit volumes supported on tone channels 0, 1 and 2
     ora     #%10010000         ;2 bit-7 (latch/data), bits-6/5 (channel - 0), bit 4 (type - latch volume)
     
-    sta     SYSVIA_ORAS        ;4 Write reg/data to SN76489
-
-    lda     #%00000000         ;2
-    sta     SYSVIA_REGB        ;4
-
-    ; Sound write held low for 8us
-    ; Seems to work at 6us, not 5us on an issue 3 beeb
-    nop                        ;2
-    nop                        ;2
-    nop                        ;2
-    nop                        ;2
-
-    lda     #%00001000         ;2
-    sta     SYSVIA_REGB        ;4
+    sound_write_slow
 
     rts                        ;6
 
@@ -521,25 +522,6 @@ ENDIF
 .L17
     pla
     rts
-
-; Write data to sound chip then add processing delay
-.sound_write_slow
-    sta     SYSVIA_ORAS        ;4 Write reg/data to SN76489
-
-    lda     #%00000000         ;2
-    sta     SYSVIA_REGB        ;4 
-
-    ; Sound write held low for 8us
-    ; Seems to work at 6us, not 5us on an issue 3 beeb
-    nop                        ;2
-    nop                        ;2
-    nop                        ;2
-    nop                        ;2
-
-    lda     #%00001000         ;2
-    sta     SYSVIA_REGB        ;4
-
-    rts                        ;6
 
 .sample_list
 
