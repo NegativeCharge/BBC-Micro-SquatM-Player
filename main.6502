@@ -74,7 +74,7 @@ ENDMACRO
     
     ; Set up audio
     lda     #0
-    sta     &2cd
+    sta     $2CD
 
     ; System VIA port A to all outputs
     lda     #%11111111
@@ -84,18 +84,18 @@ ENDMACRO
     lda     #%00001011
     sta     SYSVIA_REGB
 
-    lda 	#143
-	ldx 	#12
-	ldy 	#$FF
-	jsr 	OSBYTE                                          ; Claim NMI
+    lda     #143
+	ldx     #12
+	ldy     #$FF
+	jsr     OSBYTE                                          ; Claim NMI
 
     lda     #140
     jsr     OSBYTE                                          ; Select TAPE
     lda     #3
     sta     &258                                            ; *FX200,3 - clear memory on Break
 
-	lda 	#$40
-	sta 	$D00                                            ; Store RTI as NMI routine
+	lda     #$40
+	sta     $D00                                            ; Store RTI as NMI routine
 
     sei
 
@@ -283,14 +283,14 @@ ENDMACRO
     tya
     pha
     
-    lda     #LO(2174)             ;utz's rand seed
+    lda     #LO(2174)          ;utz's rand seed
     sta     noise_add+0
     sta     noise_acc+0
     lda     #HI(2174)
     sta     noise_add+1
     sta     noise_acc+1
     
-    ldx     #LO(211*64*2/106)   ;noise duration, takes as long as inner sound loop
+    ldx     #LO(211*64*2/106)  ;noise duration, takes as long as inner sound loop
     lda     #HI(211*64*2/106)
     sta     noise_cnt
     
