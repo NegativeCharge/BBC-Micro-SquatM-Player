@@ -73,9 +73,7 @@ MACRO sound_write_slow
 ENDMACRO
     
     ; Set up audio
-    lda     #0
-    sta     $2CD
-
+    
     ; System VIA port A to all outputs
     lda     #%11111111
     sta     SYSVIA_DDRA
@@ -98,6 +96,9 @@ ENDMACRO
 	sta     $D00                                            ; Store RTI as NMI routine
 
     sei
+
+    lda     #0
+    sta     $2CD
 
     lda     $FFB7
     sta     $FD
@@ -266,7 +267,7 @@ ENDMACRO
 .skip_drum
 
     lda     row_length
-    bpl     skip_percussion
+    bpl     trampoline1
     
     and     #$7f               ;clear percussion flag
     sta     row_length
@@ -290,8 +291,8 @@ ENDMACRO
     sta     noise_add+1
     sta     noise_acc+1
     
-    ldx     #LO(211*64*2/106)  ;noise duration, takes as long as inner sound loop
-    lda     #HI(211*64*2/106)
+    ldx     #LO(195*64*2/87)  ;noise duration, takes as long as inner sound loop
+    lda     #HI(195*64*2/87)
     sta     noise_cnt
     
 .noise_loop
@@ -332,12 +333,18 @@ ENDIF
     cmp     noise_volume       ;3
     bcc     L4                 ;2/3
     lda     #$00               ;2
-    jmp     L5                 ;3
+    jmp     skipTrampoline1    ;3
 .L4
     lda     #$0f               ;2
     nop                        ;2 dummy
-.L5
-    jsr     CONSOL             ;6    output sound bit (32 Inner)
+    jmp     skipTrampoline1    ;3
+
+.trampoline1
+    jmp     skip_percussion    ;3
+
+.skipTrampoline1
+    ora     #%10010000         ;2     bit-7 (latch/data), bits-6/5 (channel - 0), bit 4 (type - latch volume)
+    sound_write_slow           ;24    output sound bit
 
     txa                        ;2
     bne     L6                 ;2/3
@@ -447,7 +454,6 @@ ENDIF
 .noise_opcode
     NOP                        ;2 nop or rol a, self-modifying code here!
     sta     ch3_acc+1          ;3
-    
 
 ;141
 
@@ -469,14 +475,21 @@ IF DEBUG
     jsr     COLOR4
 ENDIF
 
-    jsr     CONSOL             ;6    output sound bit (32 - Inner)
+    jmp     skipTrampoline2    ;3
+
+.trampoline2
+    jmp     sound_loop         ;3
+
+.skipTrampoline2
+    ora     #%10010000         ;2    bit-7 (latch/data), bits-6/5 (channel - 0), bit 4 (type - latch volume)
+    sound_write_slow           ;24   output sound bit
 
 IF NTSC
     nop                        ;2    to make pitch and speed match between PAL/NTSC
 ENDIF
 
     dex                        ;2
-    bne     sound_loop         ;2/3=211t
+    bne     trampoline2        ;2/3 = 195t
     
     dey                        ;last byte of a 64/8 byte sample packet is #80 means it was the last packet
     lda     (sample_ptr),y
@@ -502,13 +515,6 @@ ENDIF
     jmp     sound_loop_0
 .L15
     jmp     play_loop
-
-.CONSOL                  
-    ora     #%10010000         ;2 bit-7 (latch/data), bits-6/5 (channel - 0), bit 4 (type - latch volume)
-    
-    sound_write_slow
-
-    rts                        ;6
 
 .COLOR4
     pha
