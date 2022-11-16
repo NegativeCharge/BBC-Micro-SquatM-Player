@@ -66,7 +66,6 @@ MACRO sound_write_slow
     nop                        ;2
     nop                        ;2
     nop                        ;2
-    nop                        ;2
 
     lda     #%00001000         ;2
     sta     SYSVIA_REGB        ;4
@@ -83,17 +82,17 @@ ENDMACRO
     sta     SYSVIA_REGB
 
     lda     #143
-	ldx     #12
-	ldy     #$FF
-	jsr     OSBYTE                                          ; Claim NMI
+    ldx     #12
+    ldy     #$FF
+    jsr     OSBYTE                                  ; Claim NMI
 
     lda     #140
-    jsr     OSBYTE                                          ; Select TAPE
+    jsr     OSBYTE                                  ; Select TAPE
     lda     #3
-    sta     &258                                            ; *FX200,3 - clear memory on Break
+    sta     &258                                    ; *FX200,3 - clear memory on Break
 
-	lda     #$40
-	sta     $D00                                            ; Store RTI as NMI routine
+    lda     #$40
+    sta     $D00                                    ; Store RTI as NMI routine
 
     sei
 
@@ -103,10 +102,10 @@ ENDMACRO
     lda     $FFB7
     sta     $FD
     lda     $FFB8
-    sta     $FE                                             ; (&FD)=>default vector table
+    sta     $FE                                     ; (&FD)=>default vector table
     ldy     #6
     lda     ($FD),Y
-    sta     $204                                            ; Set IRQ1V to default IRQ2V -> LDA &FC,RTI
+    sta     $204                                    ; Set IRQ1V to default IRQ2V -> LDA &FC,RTI
     iny
     lda     ($FD),Y
     sta     $205
@@ -267,7 +266,7 @@ ENDMACRO
 .skip_drum
 
     lda     row_length
-    bpl     trampoline1
+    bpl     skip_percussion
     
     and     #$7f               ;clear percussion flag
     sta     row_length
@@ -291,14 +290,14 @@ ENDMACRO
     sta     noise_add+1
     sta     noise_acc+1
     
-    ldx     #LO(195*64*2/87)  ;noise duration, takes as long as inner sound loop
-    lda     #HI(195*64*2/87)
+    ldx     #LO(195*64*2/92)   ;noise duration, takes as long as inner sound loop
+    lda     #HI(195*64*2/92)
     sta     noise_cnt
     
 .noise_loop
 
     dec     noise_div          ;5
-    beq     noise_update       ;2/3
+    beq     noise_update       ;2 Not Taken / 3 Taken     
 
 .noise_skip
 
@@ -324,7 +323,7 @@ ENDMACRO
     
 .noise_next
 
-    lda     noise_acc+1        ;3
+    lda     noise_acc+1        ;3       
 
 IF DEBUG    
     jsr     COLOR4
@@ -333,16 +332,11 @@ ENDIF
     cmp     noise_volume       ;3
     bcc     L4                 ;2/3
     lda     #$00               ;2
-    jmp     skipTrampoline1    ;3
+    jmp     L5                 ;3
 .L4
     lda     #$0f               ;2
     nop                        ;2 dummy
-    jmp     skipTrampoline1    ;3
-
-.trampoline1
-    jmp     skip_percussion    ;3
-
-.skipTrampoline1
+.L5
     ora     #%10010000         ;2     bit-7 (latch/data), bits-6/5 (channel - 0), bit 4 (type - latch volume)
     sound_write_slow           ;24    output sound bit
 
@@ -358,7 +352,7 @@ IF NTSC
 ENDIF
 
     dex                        ;2
-    jmp     noise_loop         ;3=106t
+    jmp     noise_loop         ;3=92t  
     
 .noise_done
 
@@ -475,12 +469,12 @@ IF DEBUG
     jsr     COLOR4
 ENDIF
 
-    jmp     skipTrampoline2    ;3
+    jmp     skipTrampoline     ;3
 
-.trampoline2
+.trampoline
     jmp     sound_loop         ;3
 
-.skipTrampoline2
+.skipTrampoline
     ora     #%10010000         ;2    bit-7 (latch/data), bits-6/5 (channel - 0), bit 4 (type - latch volume)
     sound_write_slow           ;24   output sound bit
 
@@ -489,7 +483,7 @@ IF NTSC
 ENDIF
 
     dex                        ;2
-    bne     trampoline2        ;2/3 = 195t
+    bne     trampoline        ;2/3 = 195t
     
     dey                        ;last byte of a 64/8 byte sample packet is #80 means it was the last packet
     lda     (sample_ptr),y
