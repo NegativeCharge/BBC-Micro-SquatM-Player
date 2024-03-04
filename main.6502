@@ -11,6 +11,7 @@ SYSVIA_DDRA             = SHEILABASE + $43  ; Data direction register A
 SYSVIA_ORAS             = SHEILABASE + $4F  ; Same as REGA but with no handshake I/O
 SYSVIA_REGB             = SHEILABASE + $40  ; Port B I/O
 
+DISPLAY_START           = $5800
 DEBUG                   = FALSE
 NTSC                    = FALSE
 
@@ -50,7 +51,7 @@ GUARD   $8F
 .vars_end
 
 ORG     &1100
-GUARD   &5800
+GUARD   DISPLAY_START
 
 .start
 
@@ -59,18 +60,9 @@ MACRO sound_write_slow
     sta     SYSVIA_ORAS        ;4 Write reg/data to SN76489
 
     lda     #%00000000         ;2
-    sta     SYSVIA_REGB        ;4 
-
-    ; Sound write held low for 8us
-    ; Seems to work at 6us, not 5us on an issue 3 beeb
-    nop                        ;2
-    nop                        ;2
-    nop                        ;2
-
-    lda     #%00001000         ;2
     sta     SYSVIA_REGB        ;4
 ENDMACRO
-    
+
     ; Set up audio
     
     ; System VIA port A to all outputs
@@ -81,34 +73,7 @@ ENDMACRO
     lda     #%00001011
     sta     SYSVIA_REGB
 
-    lda     #143
-    ldx     #12
-    ldy     #$FF
-    jsr     OSBYTE                                  ; Claim NMI
-
-    lda     #140
-    jsr     OSBYTE                                  ; Select TAPE
-    lda     #3
-    sta     &258                                    ; *FX200,3 - clear memory on Break
-
-    lda     #$40
-    sta     $D00                                    ; Store RTI as NMI routine
-
     sei
-
-    lda     #0
-    sta     $2CD
-
-    lda     $FFB7
-    sta     $FD
-    lda     $FFB8
-    sta     $FE                                     ; (&FD)=>default vector table
-    ldy     #6
-    lda     ($FD),Y
-    sta     $204                                    ; Set IRQ1V to default IRQ2V -> LDA &FC,RTI
-    iny
-    lda     ($FD),Y
-    sta     $205
 
     ; Zero volumes on all SN76489 channels, just in case anything already playing
     lda     #%11111111
@@ -153,8 +118,9 @@ ENDMACRO
 
     ldy     #0
     lda     (pattern_ptr),y
-    iny
     sta     loop_ptr+0
+
+    iny
     lda     (pattern_ptr),y
     sta     loop_ptr+1
     
@@ -290,8 +256,8 @@ ENDMACRO
     sta     noise_add+1
     sta     noise_acc+1
     
-    ldx     #LO(195*64*2/92)   ;noise duration, takes as long as inner sound loop
-    lda     #HI(195*64*2/92)
+    ldx     #LO(181*64*2/78)   ;noise duration, takes as long as inner sound loop
+    lda     #HI(181*64*2/78)
     sta     noise_cnt
     
 .noise_loop
@@ -338,7 +304,7 @@ ENDIF
     nop                        ;2 dummy
 .L5
     ora     #%10010000         ;2     bit-7 (latch/data), bits-6/5 (channel - 0), bit 4 (type - latch volume)
-    sound_write_slow           ;24    output sound bit
+    sound_write_slow           ;10    output sound bit
 
     txa                        ;2
     bne     L6                 ;2/3
@@ -352,7 +318,7 @@ IF NTSC
 ENDIF
 
     dex                        ;2
-    jmp     noise_loop         ;3=92t  
+    jmp     noise_loop         ;3=78t  
     
 .noise_done
 
@@ -446,7 +412,7 @@ ENDIF
     cmp     #$80               ;2 needed for rol a, to match Z80's srl h
 
 .noise_opcode
-    NOP                        ;2 nop or rol a, self-modifying code here!
+    nop                        ;2 nop or rol a, self-modifying code here!
     sta     ch3_acc+1          ;3
 
 ;141
@@ -476,14 +442,14 @@ ENDIF
 
 .skipTrampoline
     ora     #%10010000         ;2    bit-7 (latch/data), bits-6/5 (channel - 0), bit 4 (type - latch volume)
-    sound_write_slow           ;24   output sound bit
+    sound_write_slow           ;10   output sound bit
 
 IF NTSC
     nop                        ;2    to make pitch and speed match between PAL/NTSC
 ENDIF
 
     dex                        ;2
-    bne     trampoline        ;2/3 = 195t
+    bne     trampoline        ;2/3 = 181t
     
     dey                        ;last byte of a 64/8 byte sample packet is #80 means it was the last packet
     lda     (sample_ptr),y
@@ -534,7 +500,6 @@ ENDIF
     equw     sample_7
 
     INCLUDE "tracks\lets_go.track.6502"
-
 .end
 
 SAVE "MAIN",start,end
@@ -557,5 +522,5 @@ PRINT "-----------------------"
 \ ******************************************************************
 
 PUTBASIC "loader.bas","LOADER"
-PUTFILE  "screens\title.bin","TITLE",&5800
+PUTFILE  "screens\title.bin","TITLE",DISPLAY_START
 PUTFILE  "BOOT","!BOOT",&FFFF
