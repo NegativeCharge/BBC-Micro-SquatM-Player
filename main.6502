@@ -256,8 +256,8 @@ ENDMACRO
     sta     noise_add+1
     sta     noise_acc+1
     
-    ldx     #LO(181*64*2/78)   ;noise duration, takes as long as inner sound loop
-    lda     #HI(181*64*2/78)
+    ldx     #LO(175*64*2/72)   ;noise duration, takes as long as inner sound loop
+    lda     #HI(175*64*2/72)
     sta     noise_cnt
     
 .noise_loop
@@ -303,8 +303,8 @@ ENDIF
     lda     #$0f               ;2
     nop                        ;2 dummy
 .L5
-    ora     #%10010000         ;2     bit-7 (latch/data), bits-6/5 (channel - 0), bit 4 (type - latch volume)
-    sound_write_slow           ;10    output sound bit
+    ora     #%10010000         ;2    bit-7 (latch/data), bits-6/5 (channel - 0), bit 4 (type - latch volume)
+    sta     SYSVIA_ORAS        ;4     Write reg/data to SN76489
 
     txa                        ;2
     bne     L6                 ;2/3
@@ -318,7 +318,7 @@ IF NTSC
 ENDIF
 
     dex                        ;2
-    jmp     noise_loop         ;3=78t  
+    jmp     noise_loop         ;3=72t  
     
 .noise_done
 
@@ -435,21 +435,15 @@ IF DEBUG
     jsr     COLOR4
 ENDIF
 
-    jmp     skipTrampoline     ;3
-
-.trampoline
-    jmp     sound_loop         ;3
-
-.skipTrampoline
     ora     #%10010000         ;2    bit-7 (latch/data), bits-6/5 (channel - 0), bit 4 (type - latch volume)
-    sound_write_slow           ;10   output sound bit
+    sta     SYSVIA_ORAS        ;4    Write reg/data to SN76489
 
 IF NTSC
     nop                        ;2    to make pitch and speed match between PAL/NTSC
 ENDIF
 
     dex                        ;2
-    bne     trampoline        ;2/3 = 181t
+    bne     sound_loop         ;2/3 = 175t
     
     dey                        ;last byte of a 64/8 byte sample packet is #80 means it was the last packet
     lda     (sample_ptr),y
