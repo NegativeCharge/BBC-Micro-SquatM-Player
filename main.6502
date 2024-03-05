@@ -60,6 +60,11 @@ MACRO sound_write_slow
     sta     SYSVIA_ORAS        ;4 Write reg/data to SN76489
 
     lda     #%00000000         ;2
+    sta     SYSVIA_REGB        ;4 
+    nop                        ;2
+    nop                        ;2
+    nop                        ;2
+    lda     #%00001000         ;2
     sta     SYSVIA_REGB        ;4
 ENDMACRO
 
@@ -70,8 +75,8 @@ ENDMACRO
     sta     SYSVIA_DDRA
 
     ; Keyboard to auto-scan
-    lda     #%00001011
-    sta     SYSVIA_REGB
+    ; lda     #%00001011
+    ; sta     SYSVIA_REGB
 
     sei
 
@@ -90,6 +95,10 @@ ENDMACRO
     sound_write_slow                                ; Channel 0
     lda     #%00000000
     sound_write_slow
+
+    ; System VIA Port A, place accumulator on wires, no handshake
+    lda     #%00000000         
+    sta     SYSVIA_REGB
 
     lda     #LO(music_data)
     ldx     #HI(music_data)
@@ -303,8 +312,8 @@ ENDIF
     lda     #$0f               ;2
     nop                        ;2 dummy
 .L5
-    ora     #%10010000         ;2    bit-7 (latch/data), bits-6/5 (channel - 0), bit 4 (type - latch volume)
-    sta     SYSVIA_ORAS        ;4     Write reg/data to SN76489
+    ora     #%10010000         ;2 bit-7 (latch/data), bits-6/5 (channel - 0), bit 4 (type - latch volume)
+    sta     SYSVIA_ORAS        ;4 Write reg/data to SN76489
 
     txa                        ;2
     bne     L6                 ;2/3
