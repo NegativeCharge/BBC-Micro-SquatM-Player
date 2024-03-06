@@ -9,8 +9,6 @@ The track currently needs to be included at the bottom of main.6502 (samples are
 
 SquatM tracks can be composed in 1Tracker (https://shiru.untergrund.net/software.shtml) - you will need to export the track in Atari ca65 format, and manually convert to BeebAsm format (see samples for changes required).
 
-This still needs heavily optimizing.  It does not play back at full speed at present.
-
 SSD file for emulators/hardware: https://github.com/NegativeCharge/BBC-Micro-SquatM-Player/blob/master/SquatM_Beeper_Engine.ssd?raw=true
 
 **NOTE:**
@@ -18,3 +16,4 @@ SSD file for emulators/hardware: https://github.com/NegativeCharge/BBC-Micro-Squ
 Release Notes:
 
 - v0.1 - Initial BeebAsm port
+- v0.2 - Speed optimization
