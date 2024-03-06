@@ -19,8 +19,8 @@ OP_NOP                  = $EA
 OP_ROL_A                = $2A
 
 \ Zero Page
-ORG     $5F
-GUARD   $8F
+ORG     $5f
+GUARD   $8f
 
 .vars_start
 .loop_ptr          SKIP 2
@@ -55,6 +55,8 @@ GUARD   DISPLAY_START
 
 .start
 
+INCLUDE "lib\os.s.6502" 
+
 ; Write data to sound chip then add processing delay
 MACRO sound_write_slow
     sta     SYSVIA_ORAS        ;4 Write reg/data to SN76489
@@ -68,18 +70,7 @@ MACRO sound_write_slow
     sta     SYSVIA_REGB        ;4
 ENDMACRO
 
-    ; Set up audio
-    
-    ; System VIA port A to all outputs
-    lda     #%11111111
-    sta     SYSVIA_DDRA
-
-    ; Keyboard to auto-scan
-    ; lda     #%00001011
-    ; sta     SYSVIA_REGB
-
-    sei
-
+MACRO RESET_SOUND_CHIP
     ; Zero volumes on all SN76489 channels, just in case anything already playing
     lda     #%11111111
     sound_write_slow                                ; Channel 3 (Noise)
@@ -89,6 +80,34 @@ ENDMACRO
     sound_write_slow                                ; Channel 1
     lda     #%10011111
     sound_write_slow                                ; Channel 0
+ENDMACRO
+
+.init
+    \ Print Track Title
+    ldx     #1
+    ldy     #27
+    jsr     moveTextCursor
+
+    jsr     printString
+    equs    "Let's Go",0
+
+    \ Print Track Artist
+    ldx     #1
+    ldy     #30
+    jsr     moveTextCursor
+
+    jsr     printString
+    equs    "@shiru8bit",0
+
+    ; Set up audio
+    
+    ; System VIA port A to all outputs
+    lda     #%11111111
+    sta     SYSVIA_DDRA
+
+    sei
+
+    RESET_SOUND_CHIP
 
     ; Period to 1 on tone channel 0
     lda     #%10000001
@@ -490,6 +509,10 @@ ENDIF
     sta     $FE21
 .L17
     pla
+    cli     ; Enable interrupts
+
+    RESET_SOUND_CHIP
+
     rts
 
 .sample_list
@@ -502,10 +525,11 @@ ENDIF
     equw     sample_6
     equw     sample_7
 
-    INCLUDE "tracks\lets_go.track.6502"
+INCLUDE "tracks\lets_go.track.6502" 
+
 .end
 
-SAVE "MAIN",start,end
+SAVE "MAIN",start,end,init
 
 \ ******************************************************************
 \ *    Memory Info
@@ -526,4 +550,4 @@ PRINT "-----------------------"
 
 PUTBASIC "loader.bas","LOADER"
 PUTFILE  "screens\title.bin","TITLE",DISPLAY_START
-PUTFILE  "BOOT","!BOOT",&FFFF
+PUTFILE  "BOOT","!BOOT",$ffff

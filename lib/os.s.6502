@@ -1,0 +1,32 @@
+.printString
+    pla
+    sta 	str+1
+    pla    
+	sta 	str+2
+
+.strOut
+    inc 	str+1
+    bne 	str
+    inc 	str+2
+
+.str
+    lda 	$ffff           ; Self-Modified
+    beq 	strEnd
+    jsr 	OSWRCH
+    jmp 	strOut
+
+.strEnd
+    lda 	str+2
+    pha
+    lda 	str+1
+    pha
+
+    rts
+
+.moveTextCursor
+    lda 	#31
+    jsr 	OSWRCH
+    txa
+    jsr 	OSWRCH 
+    tya
+    jmp 	OSWRCH
