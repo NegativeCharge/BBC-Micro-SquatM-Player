@@ -1,7 +1,5 @@
 \ ******************************************************************
-\ * SQUEEKER PLUS 6502 - FIXED VERSION                            *
-\ * Corrected sample rate and drum mixing                         *
-\ * Every branch precisely balanced with exact NOP padding         *
+\ * SQUEEKER PLUS 6502                                             *
 \ ******************************************************************
 
 \ --- Debug Flag ---
@@ -343,7 +341,7 @@ ENDIF
 
 .load_hat
     LDY drum_index                        ; 3
-    CPY #175 : BCS hat_end                ; 4
+    CPY #20 : BCS hat_end                ; 4
     LDA hat_data,Y                        ; 4
     STA drum_delay                        ; 3
     INC drum_index                        ; 5
@@ -405,18 +403,17 @@ ENDIF
     RTS
 
 \ --- DRUM SAMPLE DATA ---
-\ Each value is number of samples to wait before toggle
-\ Total kick duration: ~150 samples (15ms)
-\ Pattern: 4 short, 4 medium-short, 4 medium, 4 medium-long, 4 long
 .kick_data
-    EQUB 4,4,4,4,6,6,6,6,10,10,10,10,16,16,16,16,24,24,24,24
+    EQUB 1,1,1,1,2,2,2,2
+    EQUB 3,3,3,4,4,4,5,5
+    EQUB 6,6,7,7
 
 .hat_data
-    EQUB 16,3,12,6,9,20,4,8,2,14,9,17,5,8,12,4,7,16,13,22,5,3,16,3,12,6,9,20,4,8,2,14,9,17,5,8,12,4,7,16,13,22,5,3
-    EQUB 12,8,1,24,6,7,4,9,18,12,8,3,11,7,5,8,3,17,9,15,22,6,5,8,11,13,4,8,12,9,2,4,7,8,12,6,7,4,19,22,1,9,6,27,4,3,11
-    EQUB 5,8,14,2,11,13,5,9,2,17,10,3,7,19,4,3,8,2,9,11,4,17,6,4,9,14,2,22,8,4,19,2,3,5,11,1,16,20,4,7
-    EQUB 8,9,4,12,2,8,14,3,7,7,13,9,15,1,8,4,17,3,22,4,8,11,4,21,9,6,12,4,3,8,7,17,5,9,2,11,17,4,9,3,2
-    EQUB 22,4,7,3,8,9,4,11,8,5,9,2,6,2,8,8,3,11,5,3,9,6,7,4,8
+    EQUB 16,3,12,6,9
+    EQUB 20,4,8,2,14
+    EQUB 9,17,5,8,12
+    EQUB 4,7,16,13,22
+    EQUB 5,3,16,3,12
 
 IF DEBUG
 .print_hex
