@@ -1,5 +1,5 @@
 \ ******************************************************************
-\ * SQUEEKER PLUS 6502 - FULL IMPLEMENTATION (CYCLE-TIMED)        *
+\ * SQUEEKER PLUS 6502 - FULL IMPLEMENTATION WITH DRUMS           *
 \ * Ported from Utz's Z80 Engine / 1Tracker Shiru Version          *
 \ ******************************************************************
 
@@ -13,8 +13,8 @@ SN_LOUD     = $90       \ Ch0 Vol 0
 SN_MUTE     = $9F       \ Ch0 Vol 15
 
 \ --- Timing Constants ---
-\ Target: ~312 scanlines * 64 cycles = 19,968 cycles per frame (PAL 50Hz)
-\ The synth loop must be cycle-exact to generate correct audio frequency
+\ Each sample loop ~200 cycles, need ~100 iterations per frame for 50Hz
+SAMPLES_PER_FRAME = 200
 
 \ --- Zero Page State ---
 ORG 0
@@ -22,11 +22,14 @@ SKIP 112                \ Reserve 0-111 for system use
 
 .seq_ptr     SKIP 2     \ Points to the list of patterns (the Song)
 .row_timer   SKIP 1     \ Frame counter for current row
-.frame_count SKIP 2     \ Inner loop counter for sample generation
+.sample_count SKIP 1    \ Samples remaining in current frame
 .tmp_mix     SKIP 1
 .ctrl_a      SKIP 1
 .ctrl_b      SKIP 1
 .pat_ptr     SKIP 2     \ Points to the actual notes (the Pattern)
+.drum_flag   SKIP 1     \ Which drum to play (0=none, 1=kick, 2=hat)
+.drum_ptr    SKIP 2     \ Drum sample data pointer
+.drum_len    SKIP 1     \ Drum sample count
 IF DEBUG
 .debug_row   SKIP 1     \ Row counter for debug
 ENDIF
@@ -61,7 +64,6 @@ ENDIF
 \ --- 1. SONG SEQUENCE LOGIC ---
 .pattern_end
 IF DEBUG
-    \ Print "P.END" on screen
     LDA #'P' : JSR $FFEE
     LDA #'.' : JSR $FFEE
     LDA #'E' : JSR $FFEE
@@ -79,14 +81,9 @@ ENDIF
 \ --- 2. PATTERN READER ---
 .check_row
 IF DEBUG
-    \ Print row counter
     INC debug_row
-    LDA debug_row
-    JSR print_hex
-    LDA #':' : JSR $FFEE
-    LDA #' ' : JSR $FFEE
-    
-    \ Print pattern pointer
+    LDA debug_row : JSR print_hex
+    LDA #':' : JSR $FFEE : LDA #' ' : JSR $FFEE
     LDA pat_ptr+1 : JSR print_hex
     LDA pat_ptr : JSR print_hex
     LDA #' ' : JSR $FFEE
@@ -96,9 +93,7 @@ ENDIF
     LDA (pat_ptr),Y 
     
 IF DEBUG
-    \ Print first byte
-    JSR print_hex
-    LDA #' ' : JSR $FFEE
+    JSR print_hex : LDA #' ' : JSR $FFEE
 ENDIF
     
     INY
@@ -113,9 +108,8 @@ ENDIF
     STA row_timer                         ; Number of frames to play this row
     
 IF DEBUG
-    \ Print speed
     LDA row_timer : JSR print_hex
-    LDA #13 : JSR $FFEE     ; Newline
+    LDA #13 : JSR $FFEE
 ENDIF
     
     LDA (pat_ptr),Y : STA ch2_n : INY     ; Noise low
@@ -148,9 +142,19 @@ ENDIF
     LDA #0 : STA ch3_a : STA ch3_a+1
     STY tmp_mix : LDY #0 : LDA (ch3_e),Y : STA ch3_d : LDY tmp_mix
 .ld4
-    \ --- Channel 4 Update ---
+    \ --- Channel 4 Update & DRUM CHECK ---
     LDA (pat_ptr),Y : STA ctrl_b : INY    ; Low byte of control word B
     INY                                    ; Skip high byte (always 0)
+    
+    \ Check for drums (bit 2 = kick, bit 7 = hat)
+    LDA #0 : STA drum_flag
+    LDA ctrl_b : AND #$04 : BEQ no_kick
+    LDA #1 : STA drum_flag
+.no_kick
+    LDA ctrl_b : AND #$80 : BEQ no_hat
+    LDA #2 : STA drum_flag
+.no_hat
+    
     LDA ctrl_b : AND #$40 : BNE skip4
     LDA (pat_ptr),Y : STA ch4_f : INY
     LDA (pat_ptr),Y : STA ch4_f+1 : INY
@@ -161,68 +165,101 @@ ENDIF
 .skip4
     LDA ctrl_b : AND #1 : STA ch4_s
 
-    \ --- Advance Pattern Pointer by bytes read (Y) ---
+    \ --- Advance Pattern Pointer ---
     TYA : CLC : ADC pat_ptr : STA pat_ptr
     BCC p_adv : INC pat_ptr+1
 .p_adv
-    \ Initialize frame counter for one complete frame
-    LDA #<19968 : STA frame_count       ; Low byte of cycles per frame
-    LDA #>19968 : STA frame_count+1     ; High byte
-    \ Fall through to synth_loop
+    \ Check if drum needs to be played
+    LDA drum_flag : BEQ setup_frame
+    CMP #1 : BEQ play_kick
+    JMP play_hat
+    
+.play_kick
+    LDA #LO(kick_data) : STA drum_ptr
+    LDA #HI(kick_data) : STA drum_ptr+1
+    LDA #20 : STA drum_len
+    JMP drum_player
+    
+.play_hat
+    LDA #LO(hat_data) : STA drum_ptr
+    LDA #HI(hat_data) : STA drum_ptr+1
+    LDA #175 : STA drum_len
+    JMP drum_player
 
-\ --- 3. CYCLE-TIMED SYNTHESIS LOOP ---
-\ This loop generates audio samples for ONE FRAME (1/50th second)
-\ It must repeat the sample generation enough times to fill the frame
+.setup_frame
+    LDA #SAMPLES_PER_FRAME : STA sample_count
+    JMP synth_loop
+
+\ --- 3. DRUM PLAYER ---
+.drum_player
+    LDY #0
+    LDA #SN_MUTE            ; Start with mute state
+.drum_outer
+    EOR #$0F                ; Toggle between MUTE ($9F) and LOUD ($90)
+    STA tmp_mix             ; Save output state
+    LDA (drum_ptr),Y        ; Get delay count for this sample
+    TAX                     ; X = delay count
+    INY
+.drum_inner
+    LDA tmp_mix             ; Get output state
+    STA VIA_ORA
+    LDA #0 : STA VIA_ORB : LDA #8 : STA VIA_ORB
+    DEX                     ; Decrement delay counter
+    BNE drum_inner
+    LDA tmp_mix             ; Restore output state for next toggle
+    DEC drum_len            ; Next drum sample
+    BNE drum_outer
+    
+    \ Drum done, continue to normal playback
+    LDA #SAMPLES_PER_FRAME : STA sample_count
+    JMP synth_loop
+
+\ --- 4. CYCLE-TIMED SYNTHESIS LOOP ---
 .synth_loop
     \ Generate one sample by mixing all 4 channels
-    CLC : LDA ch1_a : ADC ch1_f : STA ch1_a         ; 11 cycles
-    LDA ch1_a+1 : ADC ch1_f+1 : STA ch1_a+1         ; 11 cycles
-    LDX ch1_n : BEQ skip_n1 : ROR ch1_a+1           ; 7 cycles
+    CLC : LDA ch1_a : ADC ch1_f : STA ch1_a
+    LDA ch1_a+1 : ADC ch1_f+1 : STA ch1_a+1
+    LDX ch1_n : BEQ skip_n1 : ROR ch1_a+1
 .skip_n1
-    CMP ch1_d : LDA #0 : ROL A : STA tmp_mix        ; 11 cycles
+    CMP ch1_d : LDA #0 : ROL A : STA tmp_mix
 
-    CLC : LDA ch2_a : ADC ch2_f : STA ch2_a         ; 11 cycles
-    LDA ch2_a+1 : ADC ch2_f+1 : STA ch2_a+1         ; 11 cycles
-    LDX ch2_n : BEQ skip_n2 : ROR ch2_a+1           ; 7 cycles
+    CLC : LDA ch2_a : ADC ch2_f : STA ch2_a
+    LDA ch2_a+1 : ADC ch2_f+1 : STA ch2_a+1
+    LDX ch2_n : BEQ skip_n2 : ROR ch2_a+1
 .skip_n2
-    CMP ch2_d : LDA #0 : ROL A : ORA tmp_mix : STA tmp_mix  ; 14 cycles
+    CMP ch2_d : LDA #0 : ROL A : ORA tmp_mix : STA tmp_mix
 
-    CLC : LDA ch3_a : ADC ch3_f : STA ch3_a         ; 11 cycles
-    LDA ch3_a+1 : ADC ch3_f+1 : STA ch3_a+1         ; 11 cycles
-    CMP ch3_d : LDA #0 : ROL A : ORA tmp_mix : STA tmp_mix  ; 14 cycles
+    CLC : LDA ch3_a : ADC ch3_f : STA ch3_a
+    LDA ch3_a+1 : ADC ch3_f+1 : STA ch3_a+1
+    CMP ch3_d : LDA #0 : ROL A : ORA tmp_mix : STA tmp_mix
 
-    CLC : LDA ch4_a : ADC ch4_f : STA ch4_a         ; 11 cycles
-    LDA ch4_a+1 : ADC ch4_f+1 : STA ch4_a+1         ; 11 cycles
-    CMP ch4_d : LDA #0 : ROL A : ORA tmp_mix        ; 11 cycles
+    CLC : LDA ch4_a : ADC ch4_f : STA ch4_a
+    LDA ch4_a+1 : ADC ch4_f+1 : STA ch4_a+1
+    CMP ch4_d : LDA #0 : ROL A : ORA tmp_mix
 
-    BNE do_loud                                      ; 2-3 cycles
-    LDA #SN_MUTE : JMP send_sn                      ; 5 cycles
+    BNE do_loud
+    LDA #SN_MUTE : JMP send_sn
 .do_loud
-    LDA #SN_LOUD : NOP                              ; 4 cycles
+    LDA #SN_LOUD : NOP
 .send_sn
-    STA VIA_ORA                                      ; 4 cycles
-    LDX #0 : STX VIA_ORB                            ; 7 cycles
-    LDX #8 : STX VIA_ORB                            ; 7 cycles
+    STA VIA_ORA : LDX #0 : STX VIA_ORB : LDX #8 : STX VIA_ORB
 
-    \ Brief settling delay for SN76489 (tuned to make loop exact timing)
-    LDX #11                                          ; 2 cycles
+    \ Brief settling delay
+    LDX #11
 .pad_loop 
-    DEX : BNE pad_loop                              ; 33 cycles (11*3)
-    NOP : NOP : NOP : NOP                           ; 8 cycles
+    DEX : BNE pad_loop
+    NOP : NOP : NOP : NOP
     
-    \ Total loop: ~200 cycles per sample
-    \ Decrement frame counter
-    LDA frame_count : SEC : SBC #<200 : STA frame_count      ; 11 cycles
-    LDA frame_count+1 : SBC #>200 : STA frame_count+1        ; 11 cycles
-    BCC skip_this
-    JMP synth_loop                                           ; 3 cycles
-.skip_this
-    \ Frame complete - update envelopes and check row timer
+    \ Check if frame complete
+    DEC sample_count
+    BEQ skip_next
+    JMP synth_loop
+.skip_next
+    \ Frame complete - update envelopes
     JMP update_timer
 
-\ --- 4. ENVELOPE & SLIDE UPDATE (Once per frame) ---
+\ --- 5. ENVELOPE & SLIDE UPDATE ---
 .update_timer
-    \ Update envelope pointers for all channels
     INC ch1_e : BNE e1 : INC ch1_e+1
 .e1 LDY #0 : LDA (ch1_e),Y : CMP #$80 : BEQ e2 : STA ch1_d
 .e2 INC ch2_e : BNE e2_skip : INC ch2_e+1
@@ -233,22 +270,18 @@ ENDIF
 .e4_skip LDY #0 : LDA (ch4_e),Y : CMP #$80 : BEQ slide_proc : STA ch4_d
 
 .slide_proc
-    \ Apply pitch slide effect to channel 4
     LDA ch4_s : BEQ noslide
     LDA ch4_f+1 : LSR A : TAX
     LDA ch4_f   : ROR A : TAY
     SEC : LDA ch4_f : STY tmp_mix : SBC tmp_mix : STA ch4_f
     LDA ch4_f+1 : STX tmp_mix : SBC tmp_mix : STA ch4_f+1
 .noslide
-    \ Check if we need to advance to next row
-    DEC row_timer           ; Decrement frame counter
-    BNE play_same_row       ; If not zero, play same row again
-    JMP check_row           ; If zero, read next row
+    DEC row_timer
+    BNE play_same_row
+    JMP check_row
 
 .play_same_row
-    \ Reload frame counter and play another frame of same row
-    LDA #<19968 : STA frame_count
-    LDA #>19968 : STA frame_count+1
+    LDA #SAMPLES_PER_FRAME : STA sample_count
     JMP synth_loop
 
 .fetch_new_pattern
@@ -257,49 +290,50 @@ ENDIF
     INY
     LDA (seq_ptr),Y : STA pat_ptr+1
     
-    \ Check for end of sequence (NULL pointer = loop)
     LDA pat_ptr : ORA pat_ptr+1 : BNE fetch_done
     
 IF DEBUG
-    \ Loop back to start
-    LDA #'L' : JSR $FFEE
-    LDA #'O' : JSR $FFEE
-    LDA #'O' : JSR $FFEE
-    LDA #'P' : JSR $FFEE
+    LDA #'L' : JSR $FFEE : LDA #'O' : JSR $FFEE
+    LDA #'O' : JSR $FFEE : LDA #'P' : JSR $FFEE
     LDA #13 : JSR $FFEE
-    
-    LDA #0 : STA debug_row  ; Reset counter on loop
+    LDA #0 : STA debug_row
 ENDIF
     
-    \ Loop: reload sequence pointer from music data header
     LDA music_data : STA seq_ptr
     LDA music_data+1 : STA seq_ptr+1
     JMP fetch_new_pattern
 .fetch_done
     RTS
 
+\ --- DRUM SAMPLE DATA ---
+\ Kick: expanding periods for bass drum effect
+.kick_data
+    EQUB 16,16,16,16,32,32,32,32,64,64,64,64,128,128,128,128,0,0,0,0
+
+\ Hat: hi-hat noise pattern (175 bytes from Z80 version)
+.hat_data
+    EQUB 16,3,12,6,9,20,4,8,2,14,9,17,5,8,12,4,7,16,13,22,5,3,16,3,12,6,9,20,4,8,2,14,9,17,5,8,12,4,7,16,13,22,5,3
+    EQUB 12,8,1,24,6,7,4,9,18,12,8,3,11,7,5,8,3,17,9,15,22,6,5,8,11,13,4,8,12,9,2,4,7,8,12,6,7,4,19,22,1,9,6,27,4,3,11
+    EQUB 5,8,14,2,11,13,5,9,2,17,10,3,7,19,4,3,8,2,9,11,4,17,6,4,9,14,2,22,8,4,19,2,3,5,11,1,16,20,4,7
+    EQUB 8,9,4,12,2,8,14,3,7,7,13,9,15,1,8,4,17,3,22,4,8,11,4,21,9,6,12,4,3,8,7,17,5,9,2,11,17,4,9,3,2
+    EQUB 22,4,7,3,8,9,4,11,8,5,9,2,6,2,8,8,3,11,5,3,9,6,7,4,8
+
 IF DEBUG
-\ Print A as hex
 .print_hex
     PHA
     LSR A : LSR A : LSR A : LSR A
-    CMP #10 : BCC ph1
-    ADC #6
+    CMP #10 : BCC ph1 : ADC #6
 .ph1 ADC #'0' : JSR $FFEE
     PLA : AND #15
-    CMP #10 : BCC ph2
-    ADC #6
+    CMP #10 : BCC ph2 : ADC #6
 .ph2 ADC #'0' : JSR $FFEE
     RTS
 ENDIF
 
 .init_hw
-    \ Initialize SN76489: mute all channels
     LDA #$9F : JSR sn_w : LDA #$BF : JSR sn_w
     LDA #$DF : JSR sn_w : LDA #$FF : JSR sn_w
-    \ Configure VIA for SN76489 control
     LDA #$FF : STA $FE43 : LDA #$0F : STA $FE42
-    \ Set noise channel to periodic, mid-frequency
     LDA #$81 : JSR sn_w : LDA #$00 : JSR sn_w : RTS
 .sn_w
     STA VIA_ORA : LDX #0 : STX VIA_ORB : LDX #8 : STX VIA_ORB : RTS
@@ -309,22 +343,13 @@ ORG $2000
 .end
 SAVE "MAIN",start,end
 
-\ ******************************************************************
-\ *    Memory Info
-\ ******************************************************************
-
 PRINT "-------------------------------------"
 PRINT "      1-BIT SQUEEKER PLUS PLAYER     "
 PRINT "-------------------------------------"
 PRINT "CODE size       = ", ~end-start
-PRINT "-------------------------------------"
 PRINT "HIGH WATERMARK  = ", ~P%
 PRINT "FREE            = ", ~start+end
 PRINT "-------------------------------------"
-
-\ ******************************************************************
-\ * Supporting Files
-\ ******************************************************************
 
 PUTBASIC "loader.bas","LOADER"
 PUTFILE  "screens\title.bin","TITLE",&7c00
