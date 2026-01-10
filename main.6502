@@ -13,7 +13,6 @@ SN_LOUD     = $90       \ Ch0 Vol 0
 SN_MUTE     = $9F       \ Ch0 Vol 15
 
 \ --- Timing Constants ---
-\ Each sample loop ~200 cycles, need ~100 iterations per frame for 50Hz
 SAMPLES_PER_FRAME = 200
 
 \ --- Zero Page State ---
@@ -169,26 +168,30 @@ ENDIF
     TYA : CLC : ADC pat_ptr : STA pat_ptr
     BCC p_adv : INC pat_ptr+1
 .p_adv
-    \ Check if drum needs to be played
-    LDA drum_flag : BEQ setup_frame
-    CMP #1 : BEQ play_kick
-    JMP play_hat
+    \ Setup frame and check for drums
+    LDA #SAMPLES_PER_FRAME : STA sample_count
     
-.play_kick
+    \ Check if drum needs to be played (only once per row)
+    LDA drum_flag : BEQ synth_loop
+    CMP #1 : BEQ play_kick_now
+    CMP #2 : BEQ play_hat_now
+    JMP synth_loop
+    
+.play_kick_now
+    LDA #0 : STA drum_flag      ; Clear flag
     LDA #LO(kick_data) : STA drum_ptr
     LDA #HI(kick_data) : STA drum_ptr+1
     LDA #20 : STA drum_len
-    JMP drum_player
+    JSR drum_player
+    JMP synth_loop              ; Continue with tone synthesis
     
-.play_hat
+.play_hat_now
+    LDA #0 : STA drum_flag      ; Clear flag
     LDA #LO(hat_data) : STA drum_ptr
     LDA #HI(hat_data) : STA drum_ptr+1
     LDA #175 : STA drum_len
-    JMP drum_player
-
-.setup_frame
-    LDA #SAMPLES_PER_FRAME : STA sample_count
-    JMP synth_loop
+    JSR drum_player
+    JMP synth_loop              ; Continue with tone synthesis
 
 \ --- 3. DRUM PLAYER ---
 .drum_player
@@ -210,51 +213,79 @@ ENDIF
     DEC drum_len            ; Next drum sample
     BNE drum_outer
     
-    \ Drum done, continue to normal playback
-    LDA #SAMPLES_PER_FRAME : STA sample_count
-    JMP synth_loop
+    \ Drum done, return to caller
+    RTS
 
 \ --- 4. CYCLE-TIMED SYNTHESIS LOOP ---
 .synth_loop
     \ Generate one sample by mixing all 4 channels
+    \ Z80: add duty to high byte, rotate carry into accumulator
+    
+    LDA #0 : STA tmp_mix        ; Clear mixing accumulator (C register)
+    
+    \ Channel 1: Z80 does "add a,h : rl c"
     CLC : LDA ch1_a : ADC ch1_f : STA ch1_a
     LDA ch1_a+1 : ADC ch1_f+1 : STA ch1_a+1
-    LDX ch1_n : BEQ skip_n1 : ROR ch1_a+1
+    
+    \ Apply noise mode if enabled
+    LDX ch1_n : BEQ skip_n1
+    ROR ch1_a+1
 .skip_n1
-    CMP ch1_d : LDA #0 : ROL A : STA tmp_mix
+    \ Z80: add a,h (A = duty + high byte)
+    \ This sets carry if result > 255
+    CLC
+    ADC ch1_d                   ; A = ch1_a+1 + duty
+    \ Carry is now set if waveform should be high
+    ROL tmp_mix                 ; Rotate carry into tmp_mix
 
+    \ Channel 2
     CLC : LDA ch2_a : ADC ch2_f : STA ch2_a
     LDA ch2_a+1 : ADC ch2_f+1 : STA ch2_a+1
-    LDX ch2_n : BEQ skip_n2 : ROR ch2_a+1
+    
+    LDX ch2_n : BEQ skip_n2
+    ROR ch2_a+1
 .skip_n2
-    CMP ch2_d : LDA #0 : ROL A : ORA tmp_mix : STA tmp_mix
+    CLC
+    ADC ch2_d
+    ROL tmp_mix
 
+    \ Channel 3
     CLC : LDA ch3_a : ADC ch3_f : STA ch3_a
     LDA ch3_a+1 : ADC ch3_f+1 : STA ch3_a+1
-    CMP ch3_d : LDA #0 : ROL A : ORA tmp_mix : STA tmp_mix
+    CLC
+    ADC ch3_d
+    ROL tmp_mix
 
+    \ Channel 4
     CLC : LDA ch4_a : ADC ch4_f : STA ch4_a
     LDA ch4_a+1 : ADC ch4_f+1 : STA ch4_a+1
-    CMP ch4_d : LDA #0 : ROL A : ORA tmp_mix
-
-    BNE do_loud
-    LDA #SN_MUTE : JMP send_sn
+    CLC
+    ADC ch4_d
+    ROL tmp_mix                 ; Now tmp_mix has 4 bits
+    
+    \ Final mix: Z80 does "ld a,#f : adc a,c"
+    CLC
+    LDA #$0F
+    ADC tmp_mix
+    
+    \ Check for sound output
+    CMP #$10
+    BCS do_loud
+    
+    LDA #SN_MUTE
+    JMP send_sn
 .do_loud
-    LDA #SN_LOUD : NOP
+    LDA #SN_LOUD
 .send_sn
     STA VIA_ORA : LDX #0 : STX VIA_ORB : LDX #8 : STX VIA_ORB
 
     \ Brief settling delay
-    LDX #11
-.pad_loop 
-    DEX : BNE pad_loop
     NOP : NOP : NOP : NOP
     
     \ Check if frame complete
     DEC sample_count
-    BEQ skip_next
-    JMP synth_loop
-.skip_next
+    BNE synth_loop
+    
     \ Frame complete - update envelopes
     JMP update_timer
 
