@@ -7,7 +7,7 @@
     ],
     "tasks": [
         {
-            "label": "ca65-squatm-player.ssd",
+            "label": "Squeeker Plus 6502 Build",
             "type": "shell",
             "args": [
                 "make.bat"
@@ -26,7 +26,10 @@
                     "message": 4
                 }
             },
-            "group": "build"
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }

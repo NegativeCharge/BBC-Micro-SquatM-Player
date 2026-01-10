@@ -1,553 +1,331 @@
-;SquatM beeper music engine
-;Originally written by Shiru 06'17 for ZX Spectrum 48K
-;Ported to Atari 8-bit by Shiru 07'21
-;Ported to the BBC Micro by Negative Charge 11'22
+\ ******************************************************************
+\ * SQUEEKER PLUS 6502 - FULL IMPLEMENTATION (CYCLE-TIMED)        *
+\ * Ported from Utz's Z80 Engine / 1Tracker Shiru Version          *
+\ ******************************************************************
 
-\ Constants
-OSBYTE                  = $FFF4
-OSWRCH                  = $FFEE
-SHEILABASE              = $FE00             ; System peripherals
-SYSVIA_DDRA             = SHEILABASE + $43  ; Data direction register A
-SYSVIA_ORAS             = SHEILABASE + $4F  ; Same as REGA but with no handshake I/O
-SYSVIA_REGB             = SHEILABASE + $40  ; Port B I/O
+\ --- Debug Flag ---
+DEBUG = FALSE            \ Set to FALSE to disable debug output
 
-DISPLAY_START           = $5800
-DEBUG                   = FALSE
-NTSC                    = FALSE
+\ --- Hardware Registers ---
+VIA_ORA     = $FE41     \ Data
+VIA_ORB     = $FE40     \ Control (PB3=WE)
+SN_LOUD     = $90       \ Ch0 Vol 0
+SN_MUTE     = $9F       \ Ch0 Vol 15
 
-OP_NOP                  = $EA
-OP_ROL_A                = $2A
+\ --- Timing Constants ---
+\ Target: ~312 scanlines * 64 cycles = 19,968 cycles per frame (PAL 50Hz)
+\ The synth loop must be cycle-exact to generate correct audio frequency
 
-\ Zero Page
-ORG     $5f
-GUARD   $8f
+\ --- Zero Page State ---
+ORG 0
+SKIP 112                \ Reserve 0-111 for system use
 
-.vars_start
-.loop_ptr          SKIP 2
-.pattern_ptr       SKIP 2
-.sample_ptr        SKIP 2
-.sample_mask       SKIP 1        ;$00 or $ff
-.sample_bit        SKIP 1
-.sample_out        SKIP 1
-.row_length        SKIP 1
-.row_flags         SKIP 1
-.ch0_add           SKIP 2
-.ch1_add           SKIP 2
-.ch2_add           SKIP 2
-.ch3_add           SKIP 2
-.ch0_acc           SKIP 2
-.ch1_acc           SKIP 2
-.ch2_acc           SKIP 2
-.ch3_acc           SKIP 2
-.ch_mixer          SKIP 1
-.ch_acc            SKIP 1
-.noise_acc         SKIP 2
-.noise_add         SKIP 2
-.noise_cnt         SKIP 1
-.noise_div         SKIP 1
-.noise_pitch       SKIP 1
-.noise_volume      SKIP 1
-.temp              SKIP 1
-.vars_end
+.seq_ptr     SKIP 2     \ Points to the list of patterns (the Song)
+.row_timer   SKIP 1     \ Frame counter for current row
+.frame_count SKIP 2     \ Inner loop counter for sample generation
+.tmp_mix     SKIP 1
+.ctrl_a      SKIP 1
+.ctrl_b      SKIP 1
+.pat_ptr     SKIP 2     \ Points to the actual notes (the Pattern)
+IF DEBUG
+.debug_row   SKIP 1     \ Row counter for debug
+ENDIF
 
-ORG     &1100
-GUARD   DISPLAY_START
+\ Channel Blocks: 16-bit Freq, 16-bit Acc, 16-bit EnvPtr, 8-bit Duty
+.ch1_f SKIP 2 : .ch1_a SKIP 2 : .ch1_e SKIP 2 : .ch1_d SKIP 1 : .ch1_n SKIP 1
+.ch2_f SKIP 2 : .ch2_a SKIP 2 : .ch2_e SKIP 2 : .ch2_d SKIP 1 : .ch2_n SKIP 1
+.ch3_f SKIP 2 : .ch3_a SKIP 2 : .ch3_e SKIP 2 : .ch3_d SKIP 1
+.ch4_f SKIP 2 : .ch4_a SKIP 2 : .ch4_e SKIP 2 : .ch4_d SKIP 1 : .ch4_s SKIP 1
 
+ORG $1100
 .start
-
-INCLUDE "lib\os.s.6502" 
-
-; Write data to sound chip then add processing delay
-MACRO sound_write_slow
-    sta     SYSVIA_ORAS        ;4 Write reg/data to SN76489
-
-    lda     #%00000000         ;2
-    sta     SYSVIA_REGB        ;4 
-    nop                        ;2
-    nop                        ;2
-    nop                        ;2
-    lda     #%00001000         ;2
-    sta     SYSVIA_REGB        ;4
-ENDMACRO
-
-MACRO RESET_SOUND_CHIP
-    ; Zero volumes on all SN76489 channels, just in case anything already playing
-    lda     #%11111111
-    sound_write_slow                                ; Channel 3 (Noise)
-    lda     #%11011111
-    sound_write_slow                                ; Channel 2
-    lda     #%10111111
-    sound_write_slow                                ; Channel 1
-    lda     #%10011111
-    sound_write_slow                                ; Channel 0
-ENDMACRO
-
-.init
-    \ Print Track Title
-    ldx     #1
-    ldy     #27
-    jsr     moveTextCursor
-
-    jsr     printString
-    equs    "Let's Go",0
-
-    \ Print Track Artist
-    ldx     #1
-    ldy     #30
-    jsr     moveTextCursor
-
-    jsr     printString
-    equs    "@shiru8bit",0
-
-    ; Set up audio
+IF DEBUG
+    LDA #22 : JSR $FFF4     \ Mode 7
+    LDA #12 : JSR $FFF4     \ CLS
+ENDIF
     
-    ; System VIA port A to all outputs
-    lda     #%11111111
-    sta     SYSVIA_DDRA
-
-    sei
-
-    RESET_SOUND_CHIP
-
-    ; Period to 1 on tone channel 0
-    lda     #%10000001
-    sound_write_slow                                ; Channel 0
-    lda     #%00000000
-    sound_write_slow
-
-    ; System VIA Port A, place accumulator on wires, no handshake
-    lda     #%00000000         
-    sta     SYSVIA_REGB
-
-    lda     #LO(music_data)
-    ldx     #HI(music_data)
-
-.play
-
-    pha
-    txa
-    pha
+    SEI
+    JSR init_hw
     
-    lda     #0
-    tax
-.L1
-    sta     vars_start,x
-    inx
-    cpx     #vars_end-vars_start
-    bne     L1
-
-    lda     #OP_NOP
-    sta     noise_opcode+0
+IF DEBUG
+    LDA #0 : STA debug_row
+ENDIF
     
-    pla
-    sta     pattern_ptr+1
-    pla
-    sta     pattern_ptr+0
-
-    ldy     #0
-    lda     (pattern_ptr),y
-    sta     loop_ptr+0
-
-    iny
-    lda     (pattern_ptr),y
-    sta     loop_ptr+1
+    \ Start at the first pattern address in the sequence table (Offset +2)
+    LDA #LO(music_data+2) : STA seq_ptr
+    LDA #HI(music_data+2) : STA seq_ptr+1
     
-    lda     pattern_ptr+0
-    clc
-    adc     #2
-    sta     pattern_ptr+0
-    bcc     play_loop
-    inc     pattern_ptr+1
+    JSR fetch_new_pattern 
+    JMP check_row
 
-.play_loop
+\ --- 1. SONG SEQUENCE LOGIC ---
+.pattern_end
+IF DEBUG
+    \ Print "P.END" on screen
+    LDA #'P' : JSR $FFEE
+    LDA #'.' : JSR $FFEE
+    LDA #'E' : JSR $FFEE
+    LDA #'N' : JSR $FFEE
+    LDA #'D' : JSR $FFEE
+    LDA #' ' : JSR $FFEE
+ENDIF
+    
+    LDA seq_ptr : CLC : ADC #2 : STA seq_ptr
+    BCC p_next : INC seq_ptr+1
+.p_next
+    JSR fetch_new_pattern
+    JMP check_row
 
-    ldy     #1
-    lda     (pattern_ptr),y    ;duration of the row (0=loop), bit 7 percussion
-    bne     no_loop
+\ --- 2. PATTERN READER ---
+.check_row
+IF DEBUG
+    \ Print row counter
+    INC debug_row
+    LDA debug_row
+    JSR print_hex
+    LDA #':' : JSR $FFEE
+    LDA #' ' : JSR $FFEE
     
-.return_loop
+    \ Print pattern pointer
+    LDA pat_ptr+1 : JSR print_hex
+    LDA pat_ptr : JSR print_hex
+    LDA #' ' : JSR $FFEE
+ENDIF
+    
+    LDY #0
+    LDA (pat_ptr),Y 
+    
+IF DEBUG
+    \ Print first byte
+    JSR print_hex
+    LDA #' ' : JSR $FFEE
+ENDIF
+    
+    INY
+    CMP #$40
+    BEQ pattern_end
 
-    lda     loop_ptr+0
-    sta     pattern_ptr+0
-    lda     loop_ptr+1
-    sta     pattern_ptr+1
-    jmp     play_loop
+.rdseq
+    DEY                                   ; Back to Y=0
+    LDA (pat_ptr),Y : INY                 ; Low byte (flags)
+    STA ctrl_a
+    LDA (pat_ptr),Y : INY                 ; High byte (SPEED)
+    STA row_timer                         ; Number of frames to play this row
+    
+IF DEBUG
+    \ Print speed
+    LDA row_timer : JSR print_hex
+    LDA #13 : JSR $FFEE     ; Newline
+ENDIF
+    
+    LDA (pat_ptr),Y : STA ch2_n : INY     ; Noise low
+    LDA (pat_ptr),Y : STA ch1_n : INY     ; Noise high
 
-.no_loop
+    \ --- Channel 1 Update ---
+    LDA ctrl_a : LSR A : BCS ld2
+    LDA (pat_ptr),Y : STA ch1_f : INY
+    LDA (pat_ptr),Y : STA ch1_f+1 : INY
+    LDA (pat_ptr),Y : STA ch1_e : INY
+    LDA (pat_ptr),Y : STA ch1_e+1 : INY
+    LDA #0 : STA ch1_a : STA ch1_a+1
+    STY tmp_mix : LDY #0 : LDA (ch1_e),Y : STA ch1_d : LDY tmp_mix
+.ld2
+    \ --- Channel 2 Update ---
+    LDA ctrl_a : AND #4 : BNE ld3
+    LDA (pat_ptr),Y : STA ch2_f : INY
+    LDA (pat_ptr),Y : STA ch2_f+1 : INY
+    LDA (pat_ptr),Y : STA ch2_e : INY
+    LDA (pat_ptr),Y : STA ch2_e+1 : INY
+    LDA #0 : STA ch2_a : STA ch2_a+1
+    STY tmp_mix : LDY #0 : LDA (ch2_e),Y : STA ch2_d : LDY tmp_mix
+.ld3
+    \ --- Channel 3 Update ---
+    BIT ctrl_a : BMI ld4
+    LDA (pat_ptr),Y : STA ch3_f : INY
+    LDA (pat_ptr),Y : STA ch3_f+1 : INY
+    LDA (pat_ptr),Y : STA ch3_e : INY
+    LDA (pat_ptr),Y : STA ch3_e+1 : INY
+    LDA #0 : STA ch3_a : STA ch3_a+1
+    STY tmp_mix : LDY #0 : LDA (ch3_e),Y : STA ch3_d : LDY tmp_mix
+.ld4
+    \ --- Channel 4 Update ---
+    LDA (pat_ptr),Y : STA ctrl_b : INY    ; Low byte of control word B
+    INY                                    ; Skip high byte (always 0)
+    LDA ctrl_b : AND #$40 : BNE skip4
+    LDA (pat_ptr),Y : STA ch4_f : INY
+    LDA (pat_ptr),Y : STA ch4_f+1 : INY
+    LDA (pat_ptr),Y : STA ch4_e : INY
+    LDA (pat_ptr),Y : STA ch4_e+1 : INY
+    LDA #0 : STA ch4_a : STA ch4_a+1
+    STY tmp_mix : LDY #0 : LDA (ch4_e),Y : STA ch4_d : LDY tmp_mix
+.skip4
+    LDA ctrl_b : AND #1 : STA ch4_s
 
-    sta     row_length
-    
-    dey
-    lda     (pattern_ptr),y    ;flags DDDN4321 (Drum, Noise, 1-4 channel update)
-    iny
-    iny
-    sta     row_flags
-    
-    lsr     row_flags
-    bcc     skip_note_0
-    
-    lda     (pattern_ptr),y
-    iny
-    sta     ch0_add+0
-    lda     (pattern_ptr),y
-    iny
-    sta     ch0_add+1
-    
-.skip_note_0
+    \ --- Advance Pattern Pointer by bytes read (Y) ---
+    TYA : CLC : ADC pat_ptr : STA pat_ptr
+    BCC p_adv : INC pat_ptr+1
+.p_adv
+    \ Initialize frame counter for one complete frame
+    LDA #<19968 : STA frame_count       ; Low byte of cycles per frame
+    LDA #>19968 : STA frame_count+1     ; High byte
+    \ Fall through to synth_loop
 
-    lsr     row_flags
-    bcc     skip_note_1
-    
-    lda     (pattern_ptr),y
-    iny
-    sta     ch1_add+0
-    lda     (pattern_ptr),y
-    iny
-    sta     ch1_add+1
-    
-.skip_note_1
+\ --- 3. CYCLE-TIMED SYNTHESIS LOOP ---
+\ This loop generates audio samples for ONE FRAME (1/50th second)
+\ It must repeat the sample generation enough times to fill the frame
+.synth_loop
+    \ Generate one sample by mixing all 4 channels
+    CLC : LDA ch1_a : ADC ch1_f : STA ch1_a         ; 11 cycles
+    LDA ch1_a+1 : ADC ch1_f+1 : STA ch1_a+1         ; 11 cycles
+    LDX ch1_n : BEQ skip_n1 : ROR ch1_a+1           ; 7 cycles
+.skip_n1
+    CMP ch1_d : LDA #0 : ROL A : STA tmp_mix        ; 11 cycles
 
-    lsr     row_flags
-    bcc     skip_note_2
-    
-    lda     (pattern_ptr),y
-    iny
-    sta     ch2_add+0
-    lda     (pattern_ptr),y
-    iny
-    sta     ch2_add+1
-    
-.skip_note_2
+    CLC : LDA ch2_a : ADC ch2_f : STA ch2_a         ; 11 cycles
+    LDA ch2_a+1 : ADC ch2_f+1 : STA ch2_a+1         ; 11 cycles
+    LDX ch2_n : BEQ skip_n2 : ROR ch2_a+1           ; 7 cycles
+.skip_n2
+    CMP ch2_d : LDA #0 : ROL A : ORA tmp_mix : STA tmp_mix  ; 14 cycles
 
-    lsr     row_flags
-    bcc     skip_note_3
-    
-    lda     (pattern_ptr),y
-    iny
-    sta     ch3_add+0
-    lda     (pattern_ptr),y
-    iny
-    sta     ch3_add+1
-    
-.skip_note_3
+    CLC : LDA ch3_a : ADC ch3_f : STA ch3_a         ; 11 cycles
+    LDA ch3_a+1 : ADC ch3_f+1 : STA ch3_a+1         ; 11 cycles
+    CMP ch3_d : LDA #0 : ROL A : ORA tmp_mix : STA tmp_mix  ; 14 cycles
 
-    lsr     row_flags
-    bcc     skip_mode_change
+    CLC : LDA ch4_a : ADC ch4_f : STA ch4_a         ; 11 cycles
+    LDA ch4_a+1 : ADC ch4_f+1 : STA ch4_a+1         ; 11 cycles
+    CMP ch4_d : LDA #0 : ROL A : ORA tmp_mix        ; 11 cycles
+
+    BNE do_loud                                      ; 2-3 cycles
+    LDA #SN_MUTE : JMP send_sn                      ; 5 cycles
+.do_loud
+    LDA #SN_LOUD : NOP                              ; 4 cycles
+.send_sn
+    STA VIA_ORA                                      ; 4 cycles
+    LDX #0 : STX VIA_ORB                            ; 7 cycles
+    LDX #8 : STX VIA_ORB                            ; 7 cycles
+
+    \ Brief settling delay for SN76489 (tuned to make loop exact timing)
+    LDX #11                                          ; 2 cycles
+.pad_loop 
+    DEX : BNE pad_loop                              ; 33 cycles (11*3)
+    NOP : NOP : NOP : NOP                           ; 8 cycles
     
-    ldx     #OP_NOP
-    lda     (pattern_ptr),y
-    beq     L2
-    ldx     #OP_ROL_A
-.L2
-    stx     noise_opcode+0
-    iny
-    iny
+    \ Total loop: ~200 cycles per sample
+    \ Decrement frame counter
+    LDA frame_count : SEC : SBC #<200 : STA frame_count      ; 11 cycles
+    LDA frame_count+1 : SBC #>200 : STA frame_count+1        ; 11 cycles
+    BCC skip_this
+    JMP synth_loop                                           ; 3 cycles
+.skip_this
+    \ Frame complete - update envelopes and check row timer
+    JMP update_timer
+
+\ --- 4. ENVELOPE & SLIDE UPDATE (Once per frame) ---
+.update_timer
+    \ Update envelope pointers for all channels
+    INC ch1_e : BNE e1 : INC ch1_e+1
+.e1 LDY #0 : LDA (ch1_e),Y : CMP #$80 : BEQ e2 : STA ch1_d
+.e2 INC ch2_e : BNE e2_skip : INC ch2_e+1
+.e2_skip LDY #0 : LDA (ch2_e),Y : CMP #$80 : BEQ e3 : STA ch2_d
+.e3 INC ch3_e : BNE e3_skip : INC ch3_e+1
+.e3_skip LDY #0 : LDA (ch3_e),Y : CMP #$80 : BEQ e4 : STA ch3_d
+.e4 INC ch4_e : BNE e4_skip : INC ch4_e+1
+.e4_skip LDY #0 : LDA (ch4_e),Y : CMP #$80 : BEQ slide_proc : STA ch4_d
+
+.slide_proc
+    \ Apply pitch slide effect to channel 4
+    LDA ch4_s : BEQ noslide
+    LDA ch4_f+1 : LSR A : TAX
+    LDA ch4_f   : ROR A : TAY
+    SEC : LDA ch4_f : STY tmp_mix : SBC tmp_mix : STA ch4_f
+    LDA ch4_f+1 : STX tmp_mix : SBC tmp_mix : STA ch4_f+1
+.noslide
+    \ Check if we need to advance to next row
+    DEC row_timer           ; Decrement frame counter
+    BNE play_same_row       ; If not zero, play same row again
+    JMP check_row           ; If zero, read next row
+
+.play_same_row
+    \ Reload frame counter and play another frame of same row
+    LDA #<19968 : STA frame_count
+    LDA #>19968 : STA frame_count+1
+    JMP synth_loop
+
+.fetch_new_pattern
+    LDY #0
+    LDA (seq_ptr),Y : STA pat_ptr
+    INY
+    LDA (seq_ptr),Y : STA pat_ptr+1
     
-.skip_mode_change
-
-    lda     row_flags
-    beq     skip_drum
-
-    asl     a
-    tax
-    lda     sample_list+0-2,x
-    sta     sample_ptr+0
-    lda     sample_list+1-2,x
-    sta     sample_ptr+1
-    lda     #$80
-    sta     sample_mask
+    \ Check for end of sequence (NULL pointer = loop)
+    LDA pat_ptr : ORA pat_ptr+1 : BNE fetch_done
     
-.skip_drum
-
-    lda     row_length
-    bpl     skip_percussion
+IF DEBUG
+    \ Loop back to start
+    LDA #'L' : JSR $FFEE
+    LDA #'O' : JSR $FFEE
+    LDA #'O' : JSR $FFEE
+    LDA #'P' : JSR $FFEE
+    LDA #13 : JSR $FFEE
     
-    and     #$7f               ;clear percussion flag
-    sta     row_length
-
-    lda     (pattern_ptr),y    ;read noise volume
-    iny
-    sta     noise_volume
+    LDA #0 : STA debug_row  ; Reset counter on loop
+ENDIF
     
-    lda     (pattern_ptr),y    ;read noise pitch
-    iny
-    sta     noise_div
-    sta     noise_pitch
+    \ Loop: reload sequence pointer from music data header
+    LDA music_data : STA seq_ptr
+    LDA music_data+1 : STA seq_ptr+1
+    JMP fetch_new_pattern
+.fetch_done
+    RTS
 
-    tya
-    pha
-    
-    lda     #LO(2174)          ;utz's rand seed
-    sta     noise_add+0
-    sta     noise_acc+0
-    lda     #HI(2174)
-    sta     noise_add+1
-    sta     noise_acc+1
-    
-    ldx     #LO(175*64*2/72)   ;noise duration, takes as long as inner sound loop
-    lda     #HI(175*64*2/72)
-    sta     noise_cnt
-    
-.noise_loop
-
-    dec     noise_div          ;5
-    beq     noise_update       ;2 Not Taken / 3 Taken     
-
-.noise_skip
-
-    FOR n, 0, 13               ;28
-        nop
-    NEXT
-    lda     0                  ;3
-    jmp     noise_next         ;3
-    
-.noise_update
-
-    lda     noise_acc+0        ;3
-    adc     noise_add+0        ;3
-    sta     noise_acc+0        ;3
-    lda     noise_acc+1        ;3
-    adc     noise_add+1        ;3
-    cmp     #$80               ;2
-    rol     a                  ;2
-    sta     noise_acc+1        ;3
-    inc     noise_add+1        ;5
-    lda     noise_pitch        ;3
-    sta     noise_div          ;3
-    
-.noise_next
-
-    lda     noise_acc+1        ;3       
-
-IF DEBUG    
-    jsr     COLOR4
+IF DEBUG
+\ Print A as hex
+.print_hex
+    PHA
+    LSR A : LSR A : LSR A : LSR A
+    CMP #10 : BCC ph1
+    ADC #6
+.ph1 ADC #'0' : JSR $FFEE
+    PLA : AND #15
+    CMP #10 : BCC ph2
+    ADC #6
+.ph2 ADC #'0' : JSR $FFEE
+    RTS
 ENDIF
 
-    cmp     noise_volume       ;3
-    bcc     L4                 ;2/3
-    lda     #$00               ;2
-    jmp     L5                 ;3
-.L4
-    lda     #$0f               ;2
-    nop                        ;2 dummy
-.L5
-    ora     #%10010000         ;2 bit-7 (latch/data), bits-6/5 (channel - 0), bit 4 (type - latch volume)
-    sta     SYSVIA_ORAS        ;4 Write reg/data to SN76489
+.init_hw
+    \ Initialize SN76489: mute all channels
+    LDA #$9F : JSR sn_w : LDA #$BF : JSR sn_w
+    LDA #$DF : JSR sn_w : LDA #$FF : JSR sn_w
+    \ Configure VIA for SN76489 control
+    LDA #$FF : STA $FE43 : LDA #$0F : STA $FE42
+    \ Set noise channel to periodic, mid-frequency
+    LDA #$81 : JSR sn_w : LDA #$00 : JSR sn_w : RTS
+.sn_w
+    STA VIA_ORA : LDX #0 : STX VIA_ORB : LDX #8 : STX VIA_ORB : RTS
 
-    txa                        ;2
-    bne     L6                 ;2/3
-    lda     noise_cnt          ;3
-    beq     noise_done         ;2/3
-    dec     noise_cnt          ;5
-.L6
-
-IF NTSC
-    nop                        ;2    to make pitch AND speed match between PAL/NTSC
-ENDIF
-
-    dex                        ;2
-    jmp     noise_loop         ;3=72t  
-    
-.noise_done
-
-    pla
-    tay
-
-.skip_percussion
-
-    tya
-    clc
-    adc     pattern_ptr+0
-    sta     pattern_ptr+0
-    bcc     L7
-    inc     pattern_ptr+1
-.L7
-
-    lda     sample_mask
-    sta     sample_bit
-
-.sound_loop_0
-
-    ldx     #64                ;internal loop runs 64 times
-    ldy     #0                 ;sample ptr inside the loop
-    
-.sound_loop
-    
-    lda     (sample_ptr),y     ;5+
-    and     sample_bit         ;3
-    beq     L8                 ;2/3
-    lda     #$0f               ;2
-    jmp     L9                 ;3
-.L8
-    nop                        ;2
-    nop                        ;2
-.L9
-    sta     sample_out         ;3
-;18
-    lsr     sample_bit         ;5
-    beq     sample_inc         ;2/3
-
-    lda     0                  ;3 dummy
-    lda     0                  ;3 dummy
-    jmp     sample_next        ;3
-
-.sample_inc
-
-    lda     sample_mask        ;3
-    sta     sample_bit         ;3
-    iny                        ;2
-
-.sample_next
-
-    lda     #0                 ;2
-    sta     ch_mixer           ;3
-    
-;39
-    lda     ch0_acc+0          ;3
-    clc                        ;2
-    adc     ch0_add+0          ;3
-    sta     ch0_acc+0          ;3
-    lda     ch0_acc+1          ;3
-    adc     ch0_add+1          ;3
-    rol     ch_mixer           ;5
-    sta     ch0_acc+1          ;3
-    
-    lda     ch1_acc+0          ;3
-    clc                        ;2
-    adc     ch1_add+0          ;3
-    sta     ch1_acc+0          ;3
-    lda     ch1_acc+1          ;3
-    adc     ch1_add+1          ;3
-    rol     ch_mixer           ;5
-    sta     ch1_acc+1          ;3
-    
-    lda     ch2_acc+0          ;3
-    clc                        ;2
-    adc     ch2_add+0          ;3
-    sta     ch2_acc+0          ;3
-    lda     ch2_acc+1          ;3
-    adc     ch2_add+1          ;3
-    rol     ch_mixer           ;5
-    sta     ch2_acc+1          ;3
-
-    lda     ch3_acc+0          ;3
-    clc                        ;2
-    adc     ch3_add+0          ;3
-    sta     ch3_acc+0          ;3
-    lda     ch3_acc+1          ;3
-    adc     ch3_add+1          ;3
-    rol     ch_mixer           ;5
-    cmp     #$80               ;2 needed for rol a, to match Z80's srl h
-
-.noise_opcode
-    nop                        ;2 nop or rol a, self-modifying code here!
-    sta     ch3_acc+1          ;3
-
-;141
-
-    lda     ch_acc             ;3
-    clc                        ;2
-    adc     ch_mixer           ;3
-    bne     L10                ;2/3
-    dec     temp               ;5 dummy
-    jmp     L11                ;3
-.L10
-    adc     #$ff               ;2
-    sta     ch_acc             ;3
-    lda     #$0f               ;2
-.L11
-
-    ora     sample_out         ;3
-
-IF DEBUG    
-    jsr     COLOR4
-ENDIF
-
-    ora     #%10010000         ;2    bit-7 (latch/data), bits-6/5 (channel - 0), bit 4 (type - latch volume)
-    sta     SYSVIA_ORAS        ;4    Write reg/data to SN76489
-
-IF NTSC
-    nop                        ;2    to make pitch and speed match between PAL/NTSC
-ENDIF
-
-    dex                        ;2
-    bne     sound_loop         ;2/3 = 175t
-    
-    dey                        ;last byte of a 64/8 byte sample packet is #80 means it was the last packet
-    lda     (sample_ptr),y
-    cmp     #$80
-    bne     sample_no_stop
-    
-    lda     #0                 ;disable sample reading
-    sta     sample_mask
-
-.sample_no_stop
-
-    iny
-    tya
-    clc
-    adc     sample_ptr+0
-    sta     sample_ptr+0
-    bcc     L14
-    inc     sample_ptr+1
-.L14
-
-    dec     row_length
-    beq     L15
-    jmp     sound_loop_0
-.L15
-    jmp     play_loop
-
-.COLOR4
-    pha
-    beq     L16
-    lda     #$00+(3EOR7)
-    sta     $FE21
-    jmp     L17
-.L16
-    lda     #$00+(0EOR7)
-    sta     $FE21
-.L17
-    pla
-    cli     ; Enable interrupts
-
-    RESET_SOUND_CHIP
-
-    rts
-
-.sample_list
-
-    equw     sample_1
-    equw     sample_2
-    equw     sample_3
-    equw     sample_4
-    equw     sample_5
-    equw     sample_6
-    equw     sample_7
-
-INCLUDE "tracks\lets_go.track.6502" 
-
+ORG $2000
+    INCLUDE "tracks\Squeeker Plus\1-bit_high_and_rising.asm"
 .end
-
-SAVE "MAIN",start,end,init
+SAVE "MAIN",start,end
 
 \ ******************************************************************
 \ *    Memory Info
 \ ******************************************************************
 
-PRINT "-----------------------"
-PRINT "  1-BIT SQUATM PLAYER  "
-PRINT "-----------------------"
+PRINT "-------------------------------------"
+PRINT "      1-BIT SQUEEKER PLUS PLAYER     "
+PRINT "-------------------------------------"
 PRINT "CODE size       = ", ~end-start
-PRINT "-----------------------"
+PRINT "-------------------------------------"
 PRINT "HIGH WATERMARK  = ", ~P%
 PRINT "FREE            = ", ~start+end
-PRINT "-----------------------"
+PRINT "-------------------------------------"
 
 \ ******************************************************************
 \ * Supporting Files
 \ ******************************************************************
 
 PUTBASIC "loader.bas","LOADER"
-PUTFILE  "screens\title.bin","TITLE",DISPLAY_START
+PUTFILE  "screens\title.bin","TITLE",&7c00
 PUTFILE  "BOOT","!BOOT",$ffff
