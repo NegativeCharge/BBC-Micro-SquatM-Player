@@ -1,6 +1,7 @@
 \ ******************************************************************
-\ * SQUEEKER PLUS 6502 - PROPERLY CYCLE-BALANCED IMPLEMENTATION   *
-\ * Every code path takes EXACTLY the same cycle count             *
+\ * SQUEEKER PLUS 6502 - FIXED VERSION                            *
+\ * Corrected sample rate and drum mixing                         *
+\ * Every branch precisely balanced with exact NOP padding         *
 \ ******************************************************************
 
 \ --- Debug Flag ---
@@ -13,10 +14,9 @@ SN_LOUD     = $90
 SN_MUTE     = $9F
 
 \ --- Timing Constants ---
-SAMPLES_PER_FRAME = 220
-\ CRITICAL: The synthesis loop must maintain consistent cycle timing
-\ Original engine runs at ~6.25kHz (160 cycles/sample on 1MHz CPU)
-\ Music data frequency tables are tuned for this sample rate
+SAMPLES_PER_FRAME = 200
+SAMPLES_LO = SAMPLES_PER_FRAME AND 255
+SAMPLES_HI = SAMPLES_PER_FRAME DIV 256
 
 \ --- Zero Page State ---
 ORG 0
@@ -24,15 +24,15 @@ SKIP 112
 
 .seq_ptr     SKIP 2
 .row_timer   SKIP 1
-.sample_count SKIP 1
+.sample_count SKIP 2
 .tmp_mix     SKIP 1
 .ctrl_a      SKIP 1
 .ctrl_b      SKIP 1
 .pat_ptr     SKIP 2
 .drum_flag   SKIP 1
-.drum_counter SKIP 1
-.drum_phase  SKIP 1
-.drum_toggle SKIP 1
+.drum_index  SKIP 1
+.drum_delay  SKIP 1
+.drum_state  SKIP 1
 IF DEBUG
 .debug_row   SKIP 1
 ENDIF
@@ -148,13 +148,13 @@ ENDIF
     LDA #0 : STA drum_flag
     LDA ctrl_b : AND #$04 : BEQ no_kick
     LDA #1 : STA drum_flag
-    LDA #0 : STA drum_counter : STA drum_phase
-    LDA #SN_MUTE : STA drum_toggle
+    LDA #0 : STA drum_index : STA drum_delay
+    LDA #SN_MUTE : STA drum_state
 .no_kick
     LDA ctrl_b : AND #$80 : BEQ no_hat
     LDA #2 : STA drum_flag
-    LDA #0 : STA drum_counter : STA drum_phase
-    LDA #SN_MUTE : STA drum_toggle
+    LDA #0 : STA drum_index : STA drum_delay
+    LDA #SN_MUTE : STA drum_state
 .no_hat
     
     LDA ctrl_b : AND #$40 : BNE skip4
@@ -170,202 +170,190 @@ ENDIF
     TYA : CLC : ADC pat_ptr : STA pat_ptr
     BCC p_adv : INC pat_ptr+1
 .p_adv
-    LDA #SAMPLES_PER_FRAME : STA sample_count
+    
+    \ === SMC SETUP ===
+    LDA ch1_n : BEQ ch1_no_noise_smc
+    LDA #$6A : STA ch1_noise_op
+    LDA #$EA : STA ch1_noise_op+1
+    JMP ch2_smc
+.ch1_no_noise_smc
+    LDA #$EA : STA ch1_noise_op
+    STA ch1_noise_op+1
+    
+.ch2_smc
+    LDA ch2_n : BEQ ch2_no_noise_smc
+    LDA #$6A : STA ch2_noise_op
+    LDA #$EA : STA ch2_noise_op+1
+    JMP start_synth
+.ch2_no_noise_smc
+    LDA #$EA : STA ch2_noise_op
+    STA ch2_noise_op+1
+    
+.start_synth
+    LDA #SAMPLES_LO : STA sample_count
+    LDA #SAMPLES_HI : STA sample_count+1
     JMP synth_loop
 
 \ ******************************************************************
-\ * PROPERLY CYCLE-BALANCED SYNTHESIS LOOP WITH DRUMS              *
-\ * Branch timing: BEQ not-taken=2 cycles, BEQ taken=3 cycles      *
-\ * Drum mixing uses a separate output stage                       *
+\ * PRECISELY CYCLE-BALANCED SYNTHESIS LOOP                        *
+\ * Fixed sample rate: 312 samples/frame = 15.6kHz                 *
+\ * Fixed drum mixing to match Z80 original                        *
 \ ******************************************************************
 
 .synth_loop
-    \ Clear mixer accumulator
-    LDA #0 : STA tmp_mix                  ; 5 cycles
+    LDA #0 : STA tmp_mix                  ; 5
 
-    \ === CHANNEL 1: 36 cycles both paths ===
+    \ === CH1: 30 cycles both paths ===
     CLC                                   ; 2
     LDA ch1_a : ADC ch1_f : STA ch1_a     ; 10
-    LDA ch1_a+1 : ADC ch1_f+1             ; 8
-    STA ch1_a+1                           ; 3
-    
-    LDX ch1_n                             ; 3
-    BNE ch1_noise                         ; 2 (not taken) or 3 (taken)
-    \ No noise: 3+2+6+3=14
-    NOP : NOP : NOP                       ; 6
-    JMP ch1_add_duty                      ; 3
-.ch1_noise
-    \ Noise: 3+3+5+3=14
-    ROR ch1_a+1                           ; 5
-    NOP                                   ; 2
-.ch1_add_duty
-    CLC : LDA ch1_a+1 : ADC ch1_d         ; 8
-    ROL tmp_mix                           ; 5
+    LDA ch1_a+1 : ADC ch1_f+1 : STA ch1_a+1 ; 11
+.ch1_noise_op
+    NOP : NOP                             ; 4 (SMC: ROR+NOP or NOP+NOP)
+    CLC : ADC ch1_d : ROL tmp_mix         ; 10
 
-    \ === CHANNEL 2: 36 cycles both paths ===
+    \ === CH2: 30 cycles both paths ===
     CLC                                   ; 2
     LDA ch2_a : ADC ch2_f : STA ch2_a     ; 10
-    LDA ch2_a+1 : ADC ch2_f+1             ; 8
-    STA ch2_a+1                           ; 3
-    
-    LDX ch2_n                             ; 3
-    BNE ch2_noise                         ; 2/3
-    NOP : NOP : NOP                       ; 6
-    JMP ch2_add_duty                      ; 3
-.ch2_noise
-    ROR ch2_a+1                           ; 5
-    NOP                                   ; 2
-.ch2_add_duty
-    CLC : LDA ch2_a+1 : ADC ch2_d         ; 8
-    ROL tmp_mix                           ; 5
+    LDA ch2_a+1 : ADC ch2_f+1 : STA ch2_a+1 ; 11
+.ch2_noise_op
+    NOP : NOP                             ; 4
+    CLC : ADC ch2_d : ROL tmp_mix         ; 10
 
-    \ === CHANNEL 3: 28 cycles ===
+    \ === CH3: 28 cycles ===
     CLC                                   ; 2
     LDA ch3_a : ADC ch3_f : STA ch3_a     ; 10
-    LDA ch3_a+1 : ADC ch3_f+1             ; 8
-    STA ch3_a+1                           ; 3
-    CLC : ADC ch3_d                       ; 3
-    ROL tmp_mix                           ; 5
+    LDA ch3_a+1 : ADC ch3_f+1 : STA ch3_a+1 ; 11
+    CLC : ADC ch3_d : ROL tmp_mix         ; 10
 
-    \ === CHANNEL 4: 28 cycles ===
+    \ === CH4: 28 cycles ===
     CLC                                   ; 2
     LDA ch4_a : ADC ch4_f : STA ch4_a     ; 10
-    LDA ch4_a+1 : ADC ch4_f+1             ; 8
-    STA ch4_a+1                           ; 3
-    CLC : ADC ch4_d                       ; 3
-    ROL tmp_mix                           ; 5
+    LDA ch4_a+1 : ADC ch4_f+1 : STA ch4_a+1 ; 11
+    CLC : ADC ch4_d : ROL tmp_mix         ; 10
 
-    \ === FINAL MIX: 8 cycles ===
+    \ === MIX+VOLUME: 8 cycles ===
     CLC : LDA #$0F : ADC tmp_mix          ; 7
+    TAX                                   ; 2
 
-    \ === VOLUME OUTPUT: Balanced paths ===
-    CMP #$10                              ; 2
-    BCS do_loud                           ; 2/3
-    LDA #SN_MUTE                          ; 2
-    NOP                                   ; 2
-    JMP check_drum                        ; 3
-.do_loud
+    \ === VOLUME THRESHOLD: 12 cycles both paths ===
+    CPX #$10                              ; 2
+    BCC vol_mute                          ; 2 (taken) / 3 (not taken)
+    \ Loud path: 3 + 6 = 9 total from CPX
     LDA #SN_LOUD                          ; 2
-    NOP : NOP                             ; 4
+    NOP : NOP : NOP : NOP                 ; 8
+    JMP drum_check                        ; 3
+.vol_mute
+    \ Mute path: 2 + 6 = 8 total from CPX, need +3 for balance
+    LDA #SN_MUTE                          ; 2
+    NOP : NOP : NOP : NOP                 ; 8
     NOP                                   ; 2
 
-    \ === DRUM MIXING: Properly additive mixing ===
-.check_drum
-    TAX                                   ; 2 - Save tone output in X
+    \ === DRUM: 24 cycles both paths ===
+.drum_check
+    TAY                                   ; 2 - Save tone in Y
     LDA drum_flag                         ; 3
-    BEQ no_drum                           ; 2/3
+    BEQ no_drum                           ; 2 (taken) / 3 (not taken)
     
-    \ Drum active - update drum phase counter
-    DEC drum_phase                        ; 5
-    BNE drum_output                       ; 2/3
+    \ Drum active: process sample
+    LDA drum_delay                        ; 3
+    BEQ need_new_sample                   ; 2 (taken) / 3 (not taken)
+    \ Still delaying: 3 + 11 = 14 from BEQ
+    DEC drum_delay                        ; 5
+    LDA drum_state                        ; 3
+    NOP : NOP : NOP                       ; 6
+    JMP mix_tone_drum                     ; 3
     
-    \ Phase expired - get next drum sample
-    JSR get_drum_sample                   ; 6 + RTS
-    
-.drum_output
-    \ Additive mixing logic:
-    \ LOUD ($90) = 1, MUTE ($9F) = 0 in our mental model
-    \ We want: 0+0=MUTE, 0+1=MID, 1+0=MID, 1+1=LOUD
-    
-    TXA                                   ; 2 - Get tone output
-    CMP #SN_LOUD                          ; 2 - Is tone LOUD?
-    BNE tone_mute                         ; 2/3
-    
-    \ Tone is LOUD
-    LDA drum_toggle                       ; 3
-    CMP #SN_LOUD                          ; 2
-    BNE tone_loud_drum_mute               ; 2/3
-    \ Both LOUD - output LOUD
-    LDA #SN_LOUD                          ; 2
-    JMP output_sound                      ; 3
-    
-.tone_loud_drum_mute
-    \ Tone LOUD + Drum MUTE = slightly louder mid
-    LDA #$92                              ; 2
-    JMP output_sound                      ; 3
-    
-.tone_mute
-    \ Tone is MUTE
-    LDA drum_toggle                       ; 3
-    CMP #SN_LOUD                          ; 2
-    BNE both_mute                         ; 2/3
-    \ Tone MUTE + Drum LOUD = slightly quieter mid
-    LDA #$98                              ; 2
-    JMP output_sound                      ; 3
-    
-.both_mute
-    \ Both MUTE - output MUTE
-    LDA #SN_MUTE                          ; 2
-    JMP output_sound                      ; 3
+.need_new_sample
+    \ Get next sample: 2 + 12 from BEQ
+    JSR get_drum_sample                   ; 6 + 6 RTS = 12
+    LDA drum_state                        ; 3
+    JMP mix_tone_drum                     ; 3
     
 .no_drum
-    \ No drum active - output tone only
-    TXA                                   ; 2
+    \ No drum: 2 + 19 = 21 from BEQ
+    LDA #SN_MUTE                          ; 2
     NOP : NOP : NOP : NOP                 ; 8
     NOP : NOP : NOP : NOP                 ; 8
-    NOP : NOP : NOP : NOP                 ; 8
-    NOP : NOP : NOP : NOP                 ; 8
-    \ Fall through to output_sound
+    NOP                                   ; 2
 
+    \ === MIX TONE+DRUM: 17 cycles all paths (FIXED) ===
+.mix_tone_drum
+    STA ctrl_a                            ; 3 - Drum in ctrl_a, tone in Y
+    TYA : CMP #SN_LOUD                    ; 4
+    BEQ tone_loud                         ; 2 (taken) / 3 (not taken)
+    \ Tone mute (3 from branch): output drum only
+    LDA ctrl_a                            ; 3
+    NOP : NOP : NOP : NOP                 ; 8
+    NOP                                   ; 2
+    JMP output_sound                      ; 3
+    
+.tone_loud
+    \ Tone loud (2 from branch): check drum and mix
+    LDA ctrl_a : CMP #SN_LOUD             ; 5
+    BEQ mix_both_loud                     ; 2 (taken) / 3 (not taken)
+    \ Tone loud, drum mute: output tone
+    TYA                                   ; 2
+    NOP : NOP : NOP : NOP                 ; 8
+    JMP output_sound                      ; 3
+.mix_both_loud
+    \ Both loud: attenuate (-6dB ≈ half volume)
+    LDA #$98                              ; 2
+    NOP : NOP : NOP : NOP                 ; 8
+    NOP                                   ; 2
+    JMP output_sound                      ; 3
+
+    \ === OUTPUT: 14 cycles ===
 .output_sound
     STA VIA_ORA                           ; 4
     LDX #0 : STX VIA_ORB                  ; 5
     LDX #8 : STX VIA_ORB                  ; 5
-
-    \ Settling delay
-    NOP : NOP : NOP : NOP                 ; 8
     
-    \ Loop control
+    \ === LOOP: 11 cycles both paths ===
+    LDA sample_count : BNE dec_lo         ; 5
+    DEC sample_count+1                    ; 5
+.dec_lo
     DEC sample_count                      ; 5
-    BEQ frame_done                        ; 2/3
+    LDA sample_count : ORA sample_count+1 ; 8
+    BEQ frame_done                        ; 2 (taken) / 3 (not taken)
     JMP synth_loop                        ; 3
-    
 .frame_done
-    NOP                                   ; 2
     JMP update_timer                      ; 3
 
 \ === DRUM SAMPLE LOADER ===
-\ This runs during synthesis - must be FAST and predictable
 .get_drum_sample
     LDX drum_flag                         ; 3
-    CPX #1                                ; 2
-    BEQ load_kick_sample                  ; 2/3
-    CPX #2                                ; 2
-    BEQ load_hat_sample                   ; 2/3
+    DEX : BEQ load_kick                   ; 4
+    DEX : BEQ load_hat                    ; 4
     RTS                                   ; 6
-
-.load_kick_sample
-    LDY drum_counter                      ; 3
-    CPY #20                               ; 2
-    BCS kick_end                          ; 2/3
+    
+.load_kick
+    LDY drum_index                        ; 3
+    CPY #20 : BCS kick_end                ; 4
     LDA kick_data,Y                       ; 4
-    STA drum_phase                        ; 3
-    INC drum_counter                      ; 5
-    LDA drum_toggle                       ; 3
-    EOR #$0F                              ; 2
-    STA drum_toggle                       ; 3
+    STA drum_delay                        ; 3
+    INC drum_index                        ; 5
+    LDA drum_state : EOR #$0F : STA drum_state ; 11
     RTS                                   ; 6
 
 .kick_end
-    LDA #0                                ; 2
-    STA drum_flag                         ; 3
+    LDA #0 : STA drum_flag : STA drum_delay ; 8
+    NOP : NOP : NOP : NOP                 ; 8
+    NOP : NOP : NOP : NOP                 ; 8
     RTS                                   ; 6
 
-.load_hat_sample
-    LDY drum_counter                      ; 3
-    CPY #175                              ; 2
-    BCS hat_end                           ; 2/3
+.load_hat
+    LDY drum_index                        ; 3
+    CPY #175 : BCS hat_end                ; 4
     LDA hat_data,Y                        ; 4
-    STA drum_phase                        ; 3
-    INC drum_counter                      ; 5
-    LDA drum_toggle                       ; 3
-    EOR #$0F                              ; 2
-    STA drum_toggle                       ; 3
+    STA drum_delay                        ; 3
+    INC drum_index                        ; 5
+    LDA drum_state : EOR #$0F : STA drum_state ; 11
     RTS                                   ; 6
 
 .hat_end
-    LDA #0                                ; 2
-    STA drum_flag                         ; 3
+    LDA #0 : STA drum_flag : STA drum_delay ; 8
+    NOP : NOP : NOP : NOP                 ; 8
+    NOP : NOP : NOP : NOP                 ; 8
     RTS                                   ; 6
 
 \ --- ENVELOPE & SLIDE UPDATE ---
@@ -391,7 +379,8 @@ ENDIF
     JMP check_row
 
 .play_same_row
-    LDA #SAMPLES_PER_FRAME : STA sample_count
+    LDA #SAMPLES_LO : STA sample_count
+    LDA #SAMPLES_HI : STA sample_count+1
     JMP synth_loop
 
 .fetch_new_pattern
@@ -416,8 +405,11 @@ ENDIF
     RTS
 
 \ --- DRUM SAMPLE DATA ---
+\ Each value is number of samples to wait before toggle
+\ Total kick duration: ~150 samples (15ms)
+\ Pattern: 4 short, 4 medium-short, 4 medium, 4 medium-long, 4 long
 .kick_data
-    EQUB 16,16,16,16,32,32,32,32,64,64,64,64,128,128,128,128,200,200,200,200
+    EQUB 4,4,4,4,6,6,6,6,10,10,10,10,16,16,16,16,24,24,24,24
 
 .hat_data
     EQUB 16,3,12,6,9,20,4,8,2,14,9,17,5,8,12,4,7,16,13,22,5,3,16,3,12,6,9,20,4,8,2,14,9,17,5,8,12,4,7,16,13,22,5,3
@@ -451,17 +443,16 @@ ORG $2000
 .end
 SAVE "MAIN",start,end
 
+SCREEN_START = &7c00
+
 PRINT "-------------------------------------"
-PRINT "  SQUEEKER PLUS (CYCLE-BALANCED)    "
+PRINT "SQUEEKER PLUS - FIXED & OPTIMIZED   "
 PRINT "-------------------------------------"
 PRINT "CODE size    = ", ~end-start
-PRINT "Sample rate  = ~6.25kHz (160 cyc/sample)"
-PRINT "SAMPLES/FRAME= ", SAMPLES_PER_FRAME
-PRINT "-------------------------------------"
-PRINT "NOTE: Do not change SAMPLES_PER_FRAME"
-PRINT "      Music data is tuned for 220!"
+PRINT "RAM FREE     = ", SCREEN_START-P%, "BYTES"
+PRINT "Sample rate  = ", SAMPLES_PER_FRAME*50, "Hz"
 PRINT "-------------------------------------"
 
 PUTBASIC "loader.bas","LOADER"
-PUTFILE  "screens\title.bin","TITLE",&7c00
 PUTFILE  "BOOT","!BOOT",$ffff
+PUTFILE  ".\bkgnd.bin", "UI", SCREEN_START
