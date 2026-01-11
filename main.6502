@@ -71,18 +71,30 @@ ORG $1100
     BCC p_next
     INC seq_ptr+1
 .p_next
-    JSR fetch_new_pattern
-    JMP check_row
+    LDY #0
+    LDA (seq_ptr),Y
+    STA pat_ptr
+    INY
+    LDA (seq_ptr),Y
+    STA pat_ptr+1
+    
+    LDA pat_ptr
+    ORA pat_ptr+1
+    BNE check_row
+    
+    LDA music_data
+    STA seq_ptr
+    LDA music_data+1
+    STA seq_ptr+1
+    JMP pattern_end  ; Loop back if pattern pointer was null
 
 .check_row
     LDY #0
     LDA (pat_ptr),Y
-    INY
     CMP #$40
     BEQ pattern_end
 
 .rdseq
-    DEY
     LDA (pat_ptr),Y
     INY
     STA ctrl_a
@@ -263,11 +275,10 @@ ORG $1100
     STA sample_count
     LDA #SAMPLES_HI
     STA sample_count+1
-    JMP synth_loop
+    CLC
 
 .synth_loop
-    LDA #0
-    STA tmp_mix
+    LSR tmp_mix
 
     LDA ch1_a
     ADC ch1_f
@@ -347,7 +358,49 @@ ORG $1100
     JMP mix_tone_drum
     
 .need_new_sample
-    JSR get_drum_sample
+    LDX drum_flag
+    DEX
+    BEQ need_load_kick
+    DEX
+    BEQ need_load_hat
+    LDA drum_state
+    JMP mix_tone_drum
+    
+.need_load_kick
+    LDY drum_index
+    CPY #20
+    BCS need_kick_end
+    LDA kick_data,Y
+    STA drum_delay
+    INC drum_index
+    LDA drum_state
+    EOR #$0F
+    STA drum_state
+    JMP mix_tone_drum
+
+.need_kick_end
+    LDA #0
+    STA drum_flag
+    STA drum_delay
+    LDA drum_state
+    JMP mix_tone_drum
+
+.need_load_hat
+    LDY drum_index
+    CPY #20
+    BCS need_hat_end
+    LDA hat_data,Y
+    STA drum_delay
+    INC drum_index
+    LDA drum_state
+    EOR #$0F
+    STA drum_state
+    JMP mix_tone_drum
+
+.need_hat_end
+    LDA #0
+    STA drum_flag
+    STA drum_delay
     LDA drum_state
     JMP mix_tone_drum
     
@@ -366,11 +419,14 @@ ORG $1100
     NOP
 
 .mix_tone_drum
-    STA ctrl_a
-    TYA
+    STA ctrl_a          ; drum value in A
+    TYA                 ; tone value in Y
     CMP #SN_LOUD
-    BEQ tone_loud
-    LDA ctrl_a
+    BEQ tone_loud       ; Branch if tone is loud
+    LDA ctrl_a          ; tone is mute, so use drum value
+    NOP                 ; Add 8 NOPs (was 5)
+    NOP
+    NOP
     NOP
     NOP
     NOP
@@ -379,18 +435,22 @@ ORG $1100
     JMP output_sound
     
 .tone_loud
-    LDA ctrl_a
+    LDA ctrl_a          ; check drum value
     CMP #SN_LOUD
-    BEQ mix_both_loud
-    TYA
+    BEQ mix_both_loud   ; both loud
+    TYA                 ; drum is mute, use tone
+    NOP                 ; Add 3 NOPs (was 4) - wait, need 7 total
+    NOP
+    NOP
     NOP
     NOP
     NOP
     NOP
     JMP output_sound
+    
 .mix_both_loud
-    LDA #$98
-    NOP
+    LDA #$98            ; both loud, use mixed value
+    NOP                 ; Keep 5 NOPs
     NOP
     NOP
     NOP
@@ -404,84 +464,24 @@ ORG $1100
     LDX #8
     STX VIA_ORB
     
-    LDA sample_count
-    BNE dec_lo
-    DEC sample_count+1
-.dec_lo
     DEC sample_count
     LDA sample_count
+    CMP #$FF
+    BNE not_underflow
+    DEC sample_count+1
+.not_underflow
     ORA sample_count+1
     BEQ frame_done
     JMP synth_loop
 .frame_done
     JMP update_timer
 
-.get_drum_sample
-    LDX drum_flag
-    DEX
-    BEQ load_kick
-    DEX
-    BEQ load_hat
-    RTS
-    
-.load_kick
-    LDY drum_index
-    CPY #20
-    BCS kick_end
-    LDA kick_data,Y
-    STA drum_delay
-    INC drum_index
-    LDA drum_state
-    EOR #$0F
-    STA drum_state
-    RTS
-
-.kick_end
-    LDA #0
-    STA drum_flag
-    STA drum_delay
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    RTS
-
-.load_hat
-    LDY drum_index
-    CPY #20
-    BCS hat_end
-    LDA hat_data,Y
-    STA drum_delay
-    INC drum_index
-    LDA drum_state
-    EOR #$0F
-    STA drum_state
-    RTS
-
-.hat_end
-    LDA #0
-    STA drum_flag
-    STA drum_delay
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    RTS
-
 .update_timer
+    LDY #0          ; Load Y once at start
     INC ch1_e
     BNE e1
     INC ch1_e+1
 .e1 
-    LDY #0
     LDA (ch1_e),Y
     CMP #$80
     BEQ e2
@@ -491,8 +491,7 @@ ORG $1100
     BNE e2_skip
     INC ch2_e+1
 .e2_skip 
-    LDY #0
-    LDA (ch2_e),Y
+    LDA (ch2_e),Y   ; Y still = 0
     CMP #$80
     BEQ e3
     STA ch2_d
@@ -501,8 +500,7 @@ ORG $1100
     BNE e3_skip
     INC ch3_e+1
 .e3_skip 
-    LDY #0
-    LDA (ch3_e),Y
+    LDA (ch3_e),Y   ; Y still = 0
     CMP #$80
     BEQ e4
     STA ch3_d
@@ -511,8 +509,7 @@ ORG $1100
     BNE e4_skip
     INC ch4_e+1
 .e4_skip 
-    LDY #0
-    LDA (ch4_e),Y
+    LDA (ch4_e),Y   ; Y still = 0
     CMP #$80
     BEQ slide_proc
     STA ch4_d
@@ -545,6 +542,7 @@ ORG $1100
     STA sample_count
     LDA #SAMPLES_HI
     STA sample_count+1
+    CLC
     JMP synth_loop
 
 .fetch_new_pattern
