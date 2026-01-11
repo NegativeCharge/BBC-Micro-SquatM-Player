@@ -2,649 +2,608 @@
 \ * SQUEEKER PLUS 6502                                             *
 \ ******************************************************************
 
-\ --- Hardware Registers ---
-VIA_ORA     = $FE41                     ; VIA port A output register (SN76489 data)
-VIA_ORB     = $FE40                     ; VIA port B output register (SN76489 control)
-SN_LOUD     = $90                       ; SN76489 loud volume command
-SN_MUTE     = $9F                       ; SN76489 mute volume command
+VIA_DDRA    = $FE43
+VIA_DDRB    = $FE42
+VIA_ORA     = $FE41
+VIA_ORB     = $FE40
+SN_LOUD     = $90
+SN_MUTE     = $9F
 
-\ --- Timing Constants ---
-SAMPLES_PER_FRAME = 200                 ; Number of audio samples per video frame (50Hz)
-SAMPLES_LO = SAMPLES_PER_FRAME AND 255  ; Low byte of sample count
-SAMPLES_HI = SAMPLES_PER_FRAME DIV 256  ; High byte of sample count
+SAMPLES_PER_FRAME = 200
+SAMPLES_LO = SAMPLES_PER_FRAME AND 255
+SAMPLES_HI = SAMPLES_PER_FRAME DIV 256
 
-\ --- Zero Page State ---
 ORG 0
-SKIP 112                                ; Skip first 112 bytes of zero page
 
-.seq_ptr     SKIP 2                     ; Pointer to current position in song sequence
-.row_timer   SKIP 1                     ; Countdown timer for current pattern row
-.sample_count SKIP 2                    ; Number of samples remaining in current frame
-.tmp_mix     SKIP 1                     ; Temporary mixing accumulator
-.ctrl_a      SKIP 1                     ; Control byte A (channel update flags)
-.ctrl_b      SKIP 1                     ; Control byte B (channel 4 + drum flags)
-.pat_ptr     SKIP 2                     ; Pointer to current position in pattern data
-.drum_flag   SKIP 1                     ; Active drum type (0=none, 1=kick, 2=hat)
-.drum_index  SKIP 1                     ; Current index into drum sample data
-.drum_delay  SKIP 1                     ; Delay counter for current drum sample
-.drum_state  SKIP 1                     ; Current drum output state (toggles)
+.seq_ptr        SKIP 2
+.row_timer      SKIP 1
+.sample_count   SKIP 2
+.tmp_mix        SKIP 1
+.ctrl_a         SKIP 1
+.ctrl_b         SKIP 1
+.pat_ptr        SKIP 2
+.drum_flag      SKIP 1
+.drum_index     SKIP 1
+.drum_delay     SKIP 1
+.drum_state     SKIP 1
 
-\ Channel Blocks (frequency, accumulator, envelope, delta, extras)
-.ch1_f SKIP 2                           ; Channel 1 frequency (16-bit phase increment)
-.ch1_a SKIP 2                           ; Channel 1 accumulator (16-bit phase)
-.ch1_e SKIP 2                           ; Channel 1 envelope pointer
-.ch1_d SKIP 1                           ; Channel 1 delta (current envelope value)
-.ch1_n SKIP 1                           ; Channel 1 noise flag
+.ch1_f          SKIP 2
+.ch1_a          SKIP 2
+.ch1_e          SKIP 2
+.ch1_d          SKIP 1
+.ch1_n          SKIP 1
 
-.ch2_f SKIP 2                           ; Channel 2 frequency
-.ch2_a SKIP 2                           ; Channel 2 accumulator
-.ch2_e SKIP 2                           ; Channel 2 envelope pointer
-.ch2_d SKIP 1                           ; Channel 2 delta
-.ch2_n SKIP 1                           ; Channel 2 noise flag
+.ch2_f          SKIP 2
+.ch2_a          SKIP 2
+.ch2_e          SKIP 2
+.ch2_d          SKIP 1
+.ch2_n          SKIP 1
 
-.ch3_f SKIP 2                           ; Channel 3 frequency
-.ch3_a SKIP 2                           ; Channel 3 accumulator
-.ch3_e SKIP 2                           ; Channel 3 envelope pointer
-.ch3_d SKIP 1                           ; Channel 3 delta
+.ch3_f          SKIP 2
+.ch3_a          SKIP 2
+.ch3_e          SKIP 2
+.ch3_d          SKIP 1
 
-.ch4_f SKIP 2                           ; Channel 4 frequency
-.ch4_a SKIP 2                           ; Channel 4 accumulator
-.ch4_e SKIP 2                           ; Channel 4 envelope pointer
-.ch4_d SKIP 1                           ; Channel 4 delta
-.ch4_s SKIP 1                           ; Channel 4 slide flag
+.ch4_f          SKIP 2
+.ch4_a          SKIP 2
+.ch4_e          SKIP 2
+.ch4_d          SKIP 1
+.ch4_s          SKIP 1
 
-\ --- Main Entry Point ---
 ORG $1100
 .start
-    SEI                                 ; Disable interrupts
-    JSR init_hw                         ; Initialize sound hardware
+    SEI
+    JSR init_hw
     
-    LDA #LO(music_data+2)               ; Get low byte of sequence start
-    STA seq_ptr                         ; Store in sequence pointer
-    LDA #HI(music_data+2)               ; Get high byte of sequence start
-    STA seq_ptr+1                       ; Store in sequence pointer high
+    LDA #LO(music_data+2)
+    STA seq_ptr
+    LDA #HI(music_data+2)
+    STA seq_ptr+1
     
-    JSR fetch_new_pattern               ; Load first pattern
-    JMP check_row                       ; Start processing rows
+    JSR fetch_new_pattern
+    JMP check_row
 
-\ --- SONG SEQUENCE LOGIC ---
 .pattern_end 
-    LDA seq_ptr                         ; Get current sequence pointer
-    CLC                                 ; Clear carry
-    ADC #2                              ; Advance by 2 bytes (next pattern entry)
-    STA seq_ptr                         ; Store updated pointer
-    BCC p_next                          ; If no carry, skip high byte increment
-    INC seq_ptr+1                       ; Increment high byte
+    LDA seq_ptr
+    CLC
+    ADC #2
+    STA seq_ptr
+    BCC p_next
+    INC seq_ptr+1
 .p_next
-    JSR fetch_new_pattern               ; Load next pattern
-    JMP check_row                       ; Process first row
+    JSR fetch_new_pattern
+    JMP check_row
 
-\ --- PATTERN READER ---
 .check_row
-    LDY #0                              ; Set Y to 0
-    LDA (pat_ptr),Y                     ; Load first byte of row data    
-    INY                                 ; Increment Y to 1
-    CMP #$40                            ; Check for pattern end marker
-    BEQ pattern_end                     ; If $40, end of pattern
+    LDY #0
+    LDA (pat_ptr),Y
+    INY
+    CMP #$40
+    BEQ pattern_end
 
 .rdseq
-    DEY                                 ; Y back to 0
-    LDA (pat_ptr),Y                     ; Load control byte A
-    INY                                 ; Y = 1
-    STA ctrl_a                          ; Store control byte A
-    LDA (pat_ptr),Y                     ; Load row duration
-    INY                                 ; Y = 2
-    STA row_timer                       ; Store row timer
+    DEY
+    LDA (pat_ptr),Y
+    INY
+    STA ctrl_a
+    LDA (pat_ptr),Y
+    INY
+    STA row_timer
        
-    LDA (pat_ptr),Y                     ; Load channel 2 noise flag
-    STA ch2_n                           ; Store noise flag
-    INY                                 ; Y = 3
-    LDA (pat_ptr),Y                     ; Load channel 1 noise flag
-    STA ch1_n                           ; Store noise flag
-    INY                                 ; Y = 4
+    LDA (pat_ptr),Y
+    STA ch2_n
+    INY
+    LDA (pat_ptr),Y
+    STA ch1_n
+    INY
 
-    \ --- Channel 1 Update ---
-    LDA ctrl_a                          ; Get control byte A
-    LSR A                               ; Shift bit 0 into carry (ch1 skip flag)
-    BCS ld2                             ; If set, skip channel 1 update
-    LDA (pat_ptr),Y                     ; Load frequency low byte
+    LDA ctrl_a
+    LSR A
+    BCS ld2
+    LDA (pat_ptr),Y
     STA ch1_f
-    INY                                 ; Y = 5
-    LDA (pat_ptr),Y                     ; Load frequency high byte
+    INY
+    LDA (pat_ptr),Y
     STA ch1_f+1
-    INY                                 ; Y = 6
-    LDA (pat_ptr),Y                     ; Load envelope pointer low
+    INY
+    LDA (pat_ptr),Y
     STA ch1_e
-    INY                                 ; Y = 7
-    LDA (pat_ptr),Y                     ; Load envelope pointer high
+    INY
+    LDA (pat_ptr),Y
     STA ch1_e+1
-    INY                                 ; Y = 8
-    LDA #0                              ; Reset phase accumulator
+    INY
+    LDA #0
     STA ch1_a
     STA ch1_a+1
-    STY tmp_mix                         ; Save Y
-    LDY #0                              ; Y = 0
-    LDA (ch1_e),Y                       ; Load first envelope value
-    STA ch1_d                           ; Store as delta
-    LDY tmp_mix                         ; Restore Y
+    STY tmp_mix
+    LDY #0
+    LDA (ch1_e),Y
+    STA ch1_d
+    LDY tmp_mix
 .ld2
-    \ --- Channel 2 Update ---
-    LDA ctrl_a                          ; Get control byte A
-    AND #4                              ; Test bit 2 (ch2 skip flag)
-    BNE ld3                             ; If set, skip channel 2 update
-    LDA (pat_ptr),Y                     ; Load frequency low byte
+    LDA ctrl_a
+    AND #4
+    BNE ld3
+    LDA (pat_ptr),Y
     STA ch2_f
-    INY                                 ; Y = 9 (or 5 if ch1 skipped)
-    LDA (pat_ptr),Y                     ; Load frequency high byte
+    INY
+    LDA (pat_ptr),Y
     STA ch2_f+1
-    INY                                 ; Y = 10
-    LDA (pat_ptr),Y                     ; Load envelope pointer low
+    INY
+    LDA (pat_ptr),Y
     STA ch2_e
-    INY                                 ; Y = 11
-    LDA (pat_ptr),Y                     ; Load envelope pointer high
+    INY
+    LDA (pat_ptr),Y
     STA ch2_e+1
-    INY                                 ; Y = 12
-    LDA #0                              ; Reset phase accumulator
+    INY
+    LDA #0
     STA ch2_a
     STA ch2_a+1
-    STY tmp_mix                         ; Save Y
-    LDY #0                              ; Y = 0
-    LDA (ch2_e),Y                       ; Load first envelope value
-    STA ch2_d                           ; Store as delta
-    LDY tmp_mix                         ; Restore Y
+    STY tmp_mix
+    LDY #0
+    LDA (ch2_e),Y
+    STA ch2_d
+    LDY tmp_mix
 .ld3
-    \ --- Channel 3 Update ---
-    BIT ctrl_a                          ; Test bit 7 (ch3 skip flag)
-    BMI ld4                             ; If set, skip channel 3 update
-    LDA (pat_ptr),Y                     ; Load frequency low byte
+    BIT ctrl_a
+    BMI ld4
+    LDA (pat_ptr),Y
     STA ch3_f
-    INY                                 ; Y advances
-    LDA (pat_ptr),Y                     ; Load frequency high byte
+    INY
+    LDA (pat_ptr),Y
     STA ch3_f+1
     INY
-    LDA (pat_ptr),Y                     ; Load envelope pointer low
+    LDA (pat_ptr),Y
     STA ch3_e
     INY
-    LDA (pat_ptr),Y                     ; Load envelope pointer high
+    LDA (pat_ptr),Y
     STA ch3_e+1
     INY
-    LDA #0                              ; Reset phase accumulator
+    LDA #0
     STA ch3_a
     STA ch3_a+1
-    STY tmp_mix                         ; Save Y
-    LDY #0                              ; Y = 0
-    LDA (ch3_e),Y                       ; Load first envelope value
-    STA ch3_d                           ; Store as delta
-    LDY tmp_mix                         ; Restore Y
+    STY tmp_mix
+    LDY #0
+    LDA (ch3_e),Y
+    STA ch3_d
+    LDY tmp_mix
 .ld4
-    \ --- Channel 4 Update & Drum Check ---
-    LDA (pat_ptr),Y                     ; Load control byte B
-    STA ctrl_b                          ; Store control byte B
-    INY                                 ; Skip reserved byte
+    LDA (pat_ptr),Y
+    STA ctrl_b
+    INY
     INY
     
-    LDA #0                              ; Clear drum flag
+    LDA #0
     STA drum_flag
-    LDA ctrl_b                          ; Get control byte B
-    AND #$04                            ; Test bit 2 (kick drum flag)
-    BEQ no_kick                         ; If clear, no kick drum
-    LDA #1                              ; Set drum flag to 1 (kick)
+    LDA ctrl_b
+    AND #$04
+    BEQ no_kick
+    LDA #1
     STA drum_flag
-    LDA #0                              ; Reset drum index
+    LDA #0
     STA drum_index
-    STA drum_delay                      ; Reset drum delay
-    LDA #SN_MUTE                        ; Initialize drum state to mute
+    STA drum_delay
+    LDA #SN_MUTE
     STA drum_state
 .no_kick
-    LDA ctrl_b                          ; Get control byte B again
-    AND #$80                            ; Test bit 7 (hi-hat flag)
-    BEQ no_hat                          ; If clear, no hi-hat
-    LDA #2                              ; Set drum flag to 2 (hat)
+    LDA ctrl_b
+    AND #$80
+    BEQ no_hat
+    LDA #2
     STA drum_flag
-    LDA #0                              ; Reset drum index
+    LDA #0
     STA drum_index
-    STA drum_delay                      ; Reset drum delay
-    LDA #SN_MUTE                        ; Initialize drum state to mute
+    STA drum_delay
+    LDA #SN_MUTE
     STA drum_state
 .no_hat
     
-    LDA ctrl_b                          ; Get control byte B
-    AND #$40                            ; Test bit 6 (ch4 skip flag)
-    BNE skip4                           ; If set, skip channel 4 update
-    LDA (pat_ptr),Y                     ; Load frequency low byte
+    LDA ctrl_b
+    AND #$40
+    BNE skip4
+    LDA (pat_ptr),Y
     STA ch4_f
     INY
-    LDA (pat_ptr),Y                     ; Load frequency high byte
+    LDA (pat_ptr),Y
     STA ch4_f+1
     INY
-    LDA (pat_ptr),Y                     ; Load envelope pointer low
+    LDA (pat_ptr),Y
     STA ch4_e
     INY
-    LDA (pat_ptr),Y                     ; Load envelope pointer high
+    LDA (pat_ptr),Y
     STA ch4_e+1
     INY
-    LDA #0                              ; Reset phase accumulator
+    LDA #0
     STA ch4_a
     STA ch4_a+1
-    STY tmp_mix                         ; Save Y
-    LDY #0                              ; Y = 0
-    LDA (ch4_e),Y                       ; Load first envelope value
-    STA ch4_d                           ; Store as delta
-    LDY tmp_mix                         ; Restore Y
+    STY tmp_mix
+    LDY #0
+    LDA (ch4_e),Y
+    STA ch4_d
+    LDY tmp_mix
 .skip4
-    LDA ctrl_b                          ; Get control byte B
-    AND #1                              ; Extract bit 0 (slide flag)
-    STA ch4_s                           ; Store slide flag
+    LDA ctrl_b
+    AND #1
+    STA ch4_s
 
-    TYA                                 ; Get Y (bytes read)
-    CLC                                 ; Clear carry
-    ADC pat_ptr                         ; Add to pattern pointer low
-    STA pat_ptr                         ; Store updated pointer
-    BCC p_adv                           ; If no carry, skip high byte increment
-    INC pat_ptr+1                       ; Increment pattern pointer high
+    TYA
+    CLC
+    ADC pat_ptr
+    STA pat_ptr
+    BCC p_adv
+    INC pat_ptr+1
 .p_adv
-    LDA ch1_n                           ; Get channel 1 noise flag
-    BEQ ch1_no_noise_smc                ; If zero, disable noise
-    LDA #$6A                            ; ROR opcode
-    STA ch1_noise_op                    ; Modify first instruction
-    LDA #$EA                            ; NOP opcode
-    STA ch1_noise_op+1                  ; Modify second instruction
-    JMP ch2_smc                         ; Continue to channel 2 setup
+    LDA ch1_n
+    BEQ ch1_no_noise_smc
+    LDA #$6A
+    STA ch1_noise_op
+    LDA #$EA
+    STA ch1_noise_op+1
+    JMP ch2_smc
 .ch1_no_noise_smc
-    LDA #$EA                            ; NOP opcode
-    STA ch1_noise_op                    ; Modify first instruction
-    STA ch1_noise_op+1                  ; Modify second instruction (both NOP)
+    LDA #$EA
+    STA ch1_noise_op
+    STA ch1_noise_op+1
     
 .ch2_smc
-    LDA ch2_n                           ; Get channel 2 noise flag
-    BEQ ch2_no_noise_smc                ; If zero, disable noise
-    LDA #$6A                            ; ROR opcode
-    STA ch2_noise_op                    ; Modify first instruction
-    LDA #$EA                            ; NOP opcode
-    STA ch2_noise_op+1                  ; Modify second instruction
-    JMP start_synth                     ; Start synthesis loop
+    LDA ch2_n
+    BEQ ch2_no_noise_smc
+    LDA #$6A
+    STA ch2_noise_op
+    LDA #$EA
+    STA ch2_noise_op+1
+    JMP start_synth
 .ch2_no_noise_smc
-    LDA #$EA                            ; NOP opcode
-    STA ch2_noise_op                    ; Modify first instruction
-    STA ch2_noise_op+1                  ; Modify second instruction (both NOP)
+    LDA #$EA
+    STA ch2_noise_op
+    STA ch2_noise_op+1
     
 .start_synth
-    LDA #SAMPLES_LO                     ; Get low byte of sample count
-    STA sample_count                    ; Initialize sample counter
-    LDA #SAMPLES_HI                     ; Get high byte of sample count
-    STA sample_count+1                  ; Initialize sample counter high
-    JMP synth_loop                      ; Enter synthesis loop
+    LDA #SAMPLES_LO
+    STA sample_count
+    LDA #SAMPLES_HI
+    STA sample_count+1
+    JMP synth_loop
 
 .synth_loop
-    LDA #0                              ; Clear accumulator (5 cycles)
-    STA tmp_mix                         ; Clear mix buffer
+    LDA #0
+    STA tmp_mix
 
-    \ === CH1: 30 cycles both paths ===
-    CLC                                 ; Clear carry (2 cycles)
-    LDA ch1_a                           ; Load accumulator low (3 cycles)
-    ADC ch1_f                           ; Add frequency low (3 cycles)
-    STA ch1_a                           ; Store accumulator low (3 cycles)
-    LDA ch1_a+1                         ; Load accumulator high (3 cycles)
-    ADC ch1_f+1                         ; Add frequency high (3 cycles)
-    STA ch1_a+1                         ; Store accumulator high (3 cycles)
+    LDA ch1_a
+    ADC ch1_f
+    STA ch1_a
+    LDA ch1_a+1
+    ADC ch1_f+1
+    STA ch1_a+1
 .ch1_noise_op
-    NOP                                 ; Modified: NOP or ROR (2 cycles)
-    NOP                                 ; Modified: NOP (2 cycles)
-    CLC                                 ; Clear carry (2 cycles)
-    ADC ch1_d                           ; Add delta (current waveform value) (3 cycles)
-    ROL tmp_mix                         ; Rotate carry into mix buffer (5 cycles)
+    NOP
+    NOP
+    ADC ch1_d
+    ROL tmp_mix
 
-    \ === CH2: 30 cycles both paths ===
-    CLC                                 ; Clear carry (2 cycles)
-    LDA ch2_a                           ; Load accumulator low (3 cycles)
-    ADC ch2_f                           ; Add frequency low (3 cycles)
-    STA ch2_a                           ; Store accumulator low (3 cycles)
-    LDA ch2_a+1                         ; Load accumulator high (3 cycles)
-    ADC ch2_f+1                         ; Add frequency high (3 cycles)
-    STA ch2_a+1                         ; Store accumulator high (3 cycles)
+    LDA ch2_a
+    ADC ch2_f
+    STA ch2_a
+    LDA ch2_a+1
+    ADC ch2_f+1
+    STA ch2_a+1
 .ch2_noise_op
-    NOP                                 ; Modified: NOP or ROR (2 cycles)
-    NOP                                 ; Modified: NOP (2 cycles)
-    CLC                                 ; Clear carry (2 cycles)
-    ADC ch2_d                           ; Add delta (3 cycles)
-    ROL tmp_mix                         ; Rotate carry into mix buffer (5 cycles)
+    NOP
+    NOP
+    ADC ch2_d
+    ROL tmp_mix
 
-    \ === CH3: 28 cycles ===
-    CLC                                 ; Clear carry (2 cycles)
-    LDA ch3_a                           ; Load accumulator low (3 cycles)
-    ADC ch3_f                           ; Add frequency low (3 cycles)
-    STA ch3_a                           ; Store accumulator low (3 cycles)
-    LDA ch3_a+1                         ; Load accumulator high (3 cycles)
-    ADC ch3_f+1                         ; Add frequency high (3 cycles)
-    STA ch3_a+1                         ; Store accumulator high (3 cycles)
-    CLC                                 ; Clear carry (2 cycles)
-    ADC ch3_d                           ; Add delta (3 cycles)
-    ROL tmp_mix                         ; Rotate carry into mix buffer (5 cycles)
+    LDA ch3_a
+    ADC ch3_f
+    STA ch3_a
+    LDA ch3_a+1
+    ADC ch3_f+1
+    STA ch3_a+1
+    ADC ch3_d
+    ROL tmp_mix
 
-    \ === CH4: 28 cycles ===
-    CLC                                 ; Clear carry (2 cycles)
-    LDA ch4_a                           ; Load accumulator low (3 cycles)
-    ADC ch4_f                           ; Add frequency low (3 cycles)
-    STA ch4_a                           ; Store accumulator low (3 cycles)
-    LDA ch4_a+1                         ; Load accumulator high (3 cycles)
-    ADC ch4_f+1                         ; Add frequency high (3 cycles)
-    STA ch4_a+1                         ; Store accumulator high (3 cycles)
-    CLC                                 ; Clear carry (2 cycles)
-    ADC ch4_d                           ; Add delta (3 cycles)
-    ROL tmp_mix                         ; Rotate carry into mix buffer (5 cycles)
+    LDA ch4_a
+    ADC ch4_f
+    STA ch4_a
+    LDA ch4_a+1
+    ADC ch4_f+1
+    STA ch4_a+1
+    ADC ch4_d
+    ROL tmp_mix
 
-    \ === MIX+VOLUME: 8 cycles ===
-    CLC                                 ; Clear carry (2 cycles)
-    LDA #$0F                            ; Load base value (2 cycles)
-    ADC tmp_mix                         ; Add mixed channels (3 cycles)
-    TAX                                 ; Transfer to X (2 cycles)
+    LDA #$0F
+    ADC tmp_mix
+    TAX
 
-    \ === VOLUME THRESHOLD: 12 cycles both paths ===
-    CPX #$10                            ; Compare with threshold (2 cycles)
-    BCC vol_mute                        ; Branch if below threshold (2/3 cycles)
-    \ Loud path: 3 + 6 = 9 total from CPX
-    LDA #SN_LOUD                        ; Load loud volume command (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    JMP drum_check                      ; Jump to drum check (3 cycles)
+    CPX #$10
+    BCC vol_mute
+    LDA #SN_LOUD
+    NOP
+    NOP
+    NOP
+    NOP
+    JMP drum_check
 .vol_mute
-    \ Mute path: 2 + 6 = 8 total from CPX, need +3 for balance
-    LDA #SN_MUTE                        ; Load mute volume command (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
+    LDA #SN_MUTE
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
 
-    \ === Drum: 24 cycles both paths ===
 .drum_check
-    TAY                                 ; Save tone in Y (2 cycles)
-    LDA drum_flag                       ; Load drum flag (3 cycles)
-    BEQ no_drum                         ; Branch if no drum (2/3 cycles)
+    TAY
+    LDA drum_flag
+    BEQ no_drum
     
-    \ Drum active: process sample
-    LDA drum_delay                      ; Load drum delay counter (3 cycles)
-    BEQ need_new_sample                 ; Branch if need new sample (2/3 cycles)
-    \ Still delaying: 3 + 11 = 14 from BEQ
-    DEC drum_delay                      ; Decrement delay counter (5 cycles)
-    LDA drum_state                      ; Load current drum state (3 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    JMP mix_tone_drum                   ; Jump to mixer (3 cycles)
+    LDA drum_delay
+    BEQ need_new_sample
+    DEC drum_delay
+    LDA drum_state
+    NOP
+    NOP
+    NOP
+    JMP mix_tone_drum
     
 .need_new_sample
-    \ Get next sample: 2 + 12 from BEQ
-    JSR get_drum_sample                 ; Call drum sample loader (6 cycles + 6 RTS = 12)
-    LDA drum_state                      ; Load current drum state (3 cycles)
-    JMP mix_tone_drum                   ; Jump to mixer (3 cycles)
+    JSR get_drum_sample
+    LDA drum_state
+    JMP mix_tone_drum
     
 .no_drum
-    \ No drum: 2 + 19 = 21 from BEQ
-    LDA #SN_MUTE                        ; Load mute command (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
+    LDA #SN_MUTE
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
 
-    \ === MIX TONE+DRUM: 17 cycles all paths (FIXED) ===
 .mix_tone_drum
-    STA ctrl_a                          ; Store drum in ctrl_a (3 cycles)
-    TYA                                 ; Get tone from Y (2 cycles)
-    CMP #SN_LOUD                        ; Compare tone with loud (2 cycles)
-    BEQ tone_loud                       ; Branch if tone is loud (2/3 cycles)
-    \ Tone mute (3 from branch): output drum only
-    LDA ctrl_a                          ; Load drum state (3 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    JMP output_sound                    ; Jump to output (3 cycles)
+    STA ctrl_a
+    TYA
+    CMP #SN_LOUD
+    BEQ tone_loud
+    LDA ctrl_a
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    JMP output_sound
     
 .tone_loud
-    \ Tone loud (2 from branch): check drum and mix
-    LDA ctrl_a                          ; Load drum state (3 cycles)
-    CMP #SN_LOUD                        ; Compare drum with loud (2 cycles)
-    BEQ mix_both_loud                   ; Branch if both loud (2/3 cycles)
-    \ Tone loud, drum mute: output tone
-    TYA                                 ; Get tone (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    JMP output_sound                    ; Jump to output (3 cycles)
+    LDA ctrl_a
+    CMP #SN_LOUD
+    BEQ mix_both_loud
+    TYA
+    NOP
+    NOP
+    NOP
+    NOP
+    JMP output_sound
 .mix_both_loud
-    \ Both loud: attenuate (-6dB ≈ half volume)
-    LDA #$98                            ; Load attenuated volume (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    JMP output_sound                    ; Jump to output (3 cycles)
+    LDA #$98
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    JMP output_sound
 
-    \ === OUTPUT: 14 cycles ===
 .output_sound
-    STA VIA_ORA                         ; Send data to SN76489 (4 cycles)
-    LDX #0                              ; Load 0 (2 cycles)
-    STX VIA_ORB                         ; Set WE low (3 cycles)
-    LDX #8                              ; Load 8 (2 cycles)
-    STX VIA_ORB                         ; Set WE high (latch data) (3 cycles)
+    STA VIA_ORA
+    LDX #0
+    STX VIA_ORB
+    LDX #8
+    STX VIA_ORB
     
-    \ === LOOP: 11 cycles both paths ===
-    LDA sample_count                    ; Load sample counter low (3 cycles)
-    BNE dec_lo                          ; Branch if not zero (2 cycles)
-    DEC sample_count+1                  ; Decrement high byte (5 cycles)
+    LDA sample_count
+    BNE dec_lo
+    DEC sample_count+1
 .dec_lo
-    DEC sample_count                    ; Decrement sample counter (5 cycles)
-    LDA sample_count                    ; Load sample counter low (3 cycles)
-    ORA sample_count+1                  ; OR with high byte (3 cycles)
-    BEQ frame_done                      ; Branch if zero (2/3 cycles)
-    JMP synth_loop                      ; Continue loop (3 cycles)
+    DEC sample_count
+    LDA sample_count
+    ORA sample_count+1
+    BEQ frame_done
+    JMP synth_loop
 .frame_done
-    JMP update_timer                    ; Update envelopes and timers (3 cycles)
+    JMP update_timer
 
-\ === DRUM SAMPLE LOADER ===
 .get_drum_sample
-    LDX drum_flag                       ; Load drum type (3 cycles)
-    DEX                                 ; Decrement (type 1 = kick) (2 cycles)
-    BEQ load_kick                       ; Branch if kick (2 cycles)
-    DEX                                 ; Decrement (type 2 = hat) (2 cycles)
-    BEQ load_hat                        ; Branch if hat (2 cycles)
-    RTS                                 ; Return if invalid (6 cycles)
+    LDX drum_flag
+    DEX
+    BEQ load_kick
+    DEX
+    BEQ load_hat
+    RTS
     
 .load_kick
-    LDY drum_index                      ; Load current drum index (3 cycles)
-    CPY #20                             ; Compare with sample count (2 cycles)
-    BCS kick_end                        ; Branch if finished (2 cycles)
-    LDA kick_data,Y                     ; Load next sample delay (4 cycles)
-    STA drum_delay                      ; Store delay (3 cycles)
-    INC drum_index                      ; Advance to next sample (5 cycles)
-    LDA drum_state                      ; Load current state (3 cycles)
-    EOR #$0F                            ; Toggle between loud/mute (2 cycles)
-    STA drum_state                      ; Store new state (3 cycles)
-    RTS                                 ; Return (6 cycles)
+    LDY drum_index
+    CPY #20
+    BCS kick_end
+    LDA kick_data,Y
+    STA drum_delay
+    INC drum_index
+    LDA drum_state
+    EOR #$0F
+    STA drum_state
+    RTS
 
 .kick_end
-    LDA #0                              ; Load 0 (2 cycles)
-    STA drum_flag                       ; Clear drum flag (3 cycles)
-    STA drum_delay                      ; Clear drum delay (3 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    RTS                                 ; Return (6 cycles)
+    LDA #0
+    STA drum_flag
+    STA drum_delay
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    RTS
 
 .load_hat
-    LDY drum_index                      ; Load current drum index (3 cycles)
-    CPY #20                             ; Compare with sample count (2 cycles)
-    BCS hat_end                         ; Branch if finished (2 cycles)
-    LDA hat_data,Y                      ; Load next sample delay (4 cycles)
-    STA drum_delay                      ; Store delay (3 cycles)
-    INC drum_index                      ; Advance to next sample (5 cycles)
-    LDA drum_state                      ; Load current state (3 cycles)
-    EOR #$0F                            ; Toggle between loud/mute (2 cycles)
-    STA drum_state                      ; Store new state (3 cycles)
-    RTS                                 ; Return (6 cycles)
+    LDY drum_index
+    CPY #20
+    BCS hat_end
+    LDA hat_data,Y
+    STA drum_delay
+    INC drum_index
+    LDA drum_state
+    EOR #$0F
+    STA drum_state
+    RTS
 
 .hat_end
-    LDA #0                              ; Load 0 (2 cycles)
-    STA drum_flag                       ; Clear drum flag (3 cycles)
-    STA drum_delay                      ; Clear drum delay (3 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    NOP                                 ; Padding (2 cycles)
-    RTS                                 ; Return (6 cycles)
+    LDA #0
+    STA drum_flag
+    STA drum_delay
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+    RTS
 
-\ --- ENVELOPE & SLIDE UPDATE ---
 .update_timer
-    INC ch1_e                           ; Increment envelope pointer low
-    BNE e1                              ; If not zero, skip high byte increment
-    INC ch1_e+1                         ; Increment envelope pointer high
+    INC ch1_e
+    BNE e1
+    INC ch1_e+1
 .e1 
-    LDY #0                              ; Y = 0
-    LDA (ch1_e),Y                       ; Load current envelope value
-    CMP #$80                            ; Check for end marker
-    BEQ e2                              ; If end, skip update
-    STA ch1_d                           ; Store new delta value
+    LDY #0
+    LDA (ch1_e),Y
+    CMP #$80
+    BEQ e2
+    STA ch1_d
 .e2 
-    INC ch2_e                           ; Increment envelope pointer low
-    BNE e2_skip                         ; If not zero, skip high byte increment
-    INC ch2_e+1                         ; Increment envelope pointer high
+    INC ch2_e
+    BNE e2_skip
+    INC ch2_e+1
 .e2_skip 
-    LDY #0                              ; Y = 0
-    LDA (ch2_e),Y                       ; Load current envelope value
-    CMP #$80                            ; Check for end marker
-    BEQ e3                              ; If end, skip update
-    STA ch2_d                           ; Store new delta value
+    LDY #0
+    LDA (ch2_e),Y
+    CMP #$80
+    BEQ e3
+    STA ch2_d
 .e3 
-    INC ch3_e                           ; Increment envelope pointer low
-    BNE e3_skip                         ; If not zero, skip high byte increment
-    INC ch3_e+1                         ; Increment envelope pointer high
+    INC ch3_e
+    BNE e3_skip
+    INC ch3_e+1
 .e3_skip 
-    LDY #0                              ; Y = 0
-    LDA (ch3_e),Y                       ; Load current envelope value
-    CMP #$80                            ; Check for end marker
-    BEQ e4                              ; If end, skip update
-    STA ch3_d                           ; Store new delta value
+    LDY #0
+    LDA (ch3_e),Y
+    CMP #$80
+    BEQ e4
+    STA ch3_d
 .e4 
-    INC ch4_e                           ; Increment envelope pointer low
-    BNE e4_skip                         ; If not zero, skip high byte increment
-    INC ch4_e+1                         ; Increment envelope pointer high
+    INC ch4_e
+    BNE e4_skip
+    INC ch4_e+1
 .e4_skip 
-    LDY #0                              ; Y = 0
-    LDA (ch4_e),Y                       ; Load current envelope value
-    CMP #$80                            ; Check for end marker
-    BEQ slide_proc                      ; If end, skip to slide processing
-    STA ch4_d                           ; Store new delta value
+    LDY #0
+    LDA (ch4_e),Y
+    CMP #$80
+    BEQ slide_proc
+    STA ch4_d
 
 .slide_proc
-    LDA ch4_s                           ; Load slide flag
-    BEQ noslide                         ; If zero, no slide active
-    LDA ch4_f+1                         ; Load frequency high byte
-    LSR A                               ; Divide by 2 (shift right)
-    TAX                                 ; Save high result in X
-    LDA ch4_f                           ; Load frequency low byte
-    ROR A                               ; Rotate right (complete division by 2)
-    TAY                                 ; Save low result in Y
-    SEC                                 ; Set carry for subtraction
-    LDA ch4_f                           ; Load frequency low byte
-    STY tmp_mix                         ; Store divided low in temp
-    SBC tmp_mix                         ; Subtract (freq - freq/2)
-    STA ch4_f                           ; Store new frequency low
-    LDA ch4_f+1                         ; Load frequency high byte
-    STX tmp_mix                         ; Store divided high in temp
-    SBC tmp_mix                         ; Subtract with borrow
-    STA ch4_f+1                         ; Store new frequency high
+    LDA ch4_s
+    BEQ noslide
+    LDA ch4_f+1
+    LSR A
+    TAX
+    LDA ch4_f
+    ROR A
+    TAY
+    SEC
+    LDA ch4_f
+    STY tmp_mix
+    SBC tmp_mix
+    STA ch4_f
+    LDA ch4_f+1
+    STX tmp_mix
+    SBC tmp_mix
+    STA ch4_f+1
 .noslide
-    DEC row_timer                       ; Decrement row timer
-    BNE play_same_row                   ; If not zero, continue current row
-    JMP check_row                       ; If zero, load next row
+    DEC row_timer
+    BNE play_same_row
+    JMP check_row
 
 .play_same_row
-    LDA #SAMPLES_LO                     ; Reload sample count low
+    LDA #SAMPLES_LO
     STA sample_count
-    LDA #SAMPLES_HI                     ; Reload sample count high
+    LDA #SAMPLES_HI
     STA sample_count+1
-    JMP synth_loop                      ; Continue synthesis
+    JMP synth_loop
 
 .fetch_new_pattern
-    LDY #0                              ; Y = 0
-    LDA (seq_ptr),Y                     ; Load pattern pointer low from sequence
-    STA pat_ptr                         ; Store pattern pointer low
-    INY                                 ; Y = 1
-    LDA (seq_ptr),Y                     ; Load pattern pointer high from sequence
-    STA pat_ptr+1                       ; Store pattern pointer high
+    LDY #0
+    LDA (seq_ptr),Y
+    STA pat_ptr
+    INY
+    LDA (seq_ptr),Y
+    STA pat_ptr+1
     
-    LDA pat_ptr                         ; Load pattern pointer low
-    ORA pat_ptr+1                       ; OR with high byte
-    BNE fetch_done                      ; If not zero, valid pattern
+    LDA pat_ptr
+    ORA pat_ptr+1
+    BNE fetch_done
     
-    LDA music_data                      ; Load loop point low
-    STA seq_ptr                         ; Reset sequence pointer
-    LDA music_data+1                    ; Load loop point high
-    STA seq_ptr+1                       ; Reset sequence pointer high
-    JMP fetch_new_pattern               ; Fetch pattern at loop point
+    LDA music_data
+    STA seq_ptr
+    LDA music_data+1
+    STA seq_ptr+1
+    JMP fetch_new_pattern
 .fetch_done
-    RTS                                 ; Return
+    RTS
 
-\ --- DRUM SAMPLE DATA ---
-\ Kick drum: 20 samples with increasing delays (simulates decay)
 .kick_data
-    EQUB 1,1,1,1,2,2,2,2                ; Fast alternation (attack)
-    EQUB 3,3,3,4,4,4,5,5                ; Slower alternation (decay)
-    EQUB 6,6,7,7                        ; Very slow (tail)
+    EQUB 1,1,1,1,2,2,2,2
+    EQUB 3,3,3,4,4,4,5,5
+    EQUB 6,6,7,7
 
-\ Hi-hat: 25 samples with pseudo-random delays (noise-like)
 .hat_data
-    EQUB 16,3,12,6,9                    ; Irregular pattern
-    EQUB 20,4,8,2,14                    ; Creates noise effect
-    EQUB 9,17,5,8,12                    ; When toggled rapidly
-    EQUB 4,7,16,13,22                   ; Between loud/mute
-    EQUB 5,3,16,3,12                    ; At different intervals
+    EQUB 16,3,12,6,9
+    EQUB 20,4,8,2,14
+    EQUB 9,17,5,8,12
+    EQUB 4,7,16,13,22
+    EQUB 5,3,16,3,12
 
 .init_hw
-    LDA #$9F                            ; Mute channel 1
+    LDA #$9F
     JSR sn_w
-    LDA #$BF                            ; Mute channel 2
+    LDA #$BF
     JSR sn_w
-    LDA #$DF                            ; Mute channel 3
+    LDA #$DF
     JSR sn_w
-    LDA #$FF                            ; Mute noise channel
+    LDA #$FF
     JSR sn_w
-    LDA #$FF                            ; Set VIA port A to output
-    STA $FE43
-    LDA #$0F                            ; Set VIA port B pins 0-3 to output
-    STA $FE42
-    LDA #$81                            ; Initialize noise channel frequency
+    LDA #$FF
+    STA VIA_DDRA
+    LDA #$0F
+    STA VIA_DDRB
+    LDA #$81
     JSR sn_w
-    LDA #$00                            ; Set noise to periodic
+    LDA #$00
     JSR sn_w
-    RTS                                 ; Return
+    RTS
 .sn_w
-    STA VIA_ORA                         ; Send data to SN76489
-    LDX #0                              ; Load 0
-    STX VIA_ORB                         ; Set WE low
-    LDX #8                              ; Load 8
-    STX VIA_ORB                         ; Set WE high (latch data)
-    RTS                                 ; Return
+    STA VIA_ORA
+    LDX #0
+    STX VIA_ORB
+    LDX #8
+    STX VIA_ORB
+    RTS
 
 ORG $2000
     INCLUDE "tracks\Squeeker Plus\1-bit_high_and_rising.asm"
