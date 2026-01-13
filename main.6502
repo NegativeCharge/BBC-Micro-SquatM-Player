@@ -1,5 +1,6 @@
 \ ******************************************************************
-\ * SQUEEKER PLUS 6502 - OPTIMIZED FOR SPEED - TONE FIXED        *
+\ * SQUEEKER PLUS 6502 - OPTIMIZED FOR SPEED - DRUMS FIXED       *
+\ * Fixed drum implementation to match Z80 reference             *
 \ ******************************************************************
 
 VIA_DDRA    = $FE43
@@ -332,75 +333,58 @@ ORG $1100
     ADC #$0F
     TAX
 
-    \ Tone volume decision - original logic restored
+    \ Tone volume decision
     CPX #$10
-    LDA #SN_MUTE        ; Assume mute
-    BCS vol_set         ; If carry set (>=16), it's mute
-    LDA #SN_LOUD        ; Otherwise loud
+    LDA #SN_MUTE
+    BCS vol_set
+    LDA #SN_LOUD
 .vol_set
-    TAY                 ; Save tone volume in Y
+    TAY                     ; Y = tone volume
 
-    \ Drum processing - optimized path
+    \ Check if drum is active
     LDX drum_flag
-    BEQ output_no_drum  ; Fast path if no drum
+    BEQ output_no_drum      ; No drum, just output tone
     
-    \ Drum active - check delay
+    \ Drum is active - check delay
     LDX drum_delay
-    BEQ need_new_sample
+    BEQ need_new_sample     ; Delay expired, get next sample
+    
+    \ Still in delay - decrement and output current state
     DEC drum_delay
     LDA drum_state
-    JMP mix_tone_drum
+    JMP output_drum_mix
     
 .need_new_sample
+    \ Get next delay value from drum data
     LDX drum_flag
     DEX
-    BEQ need_load_kick
-    DEX
-    BEQ need_load_hat
-    LDA drum_state
-    JMP mix_tone_drum
+    BEQ load_kick_sample
+    DEX  
+    BEQ load_hat_sample
+    \ Invalid drum flag
+    JMP output_no_drum
     
-.need_load_kick
+.load_kick_sample
     LDX drum_index
-    CPX #20
-    BCS need_kick_end
+    CPX #16                 ; Kick is now 16 bytes
+    BCS kick_finished
     LDA kick_data,X
     STA drum_delay
     INC drum_index
+    \ XOR the drum state (alternating pattern)
     LDA drum_state
     EOR #$0F
     STA drum_state
-    JMP mix_tone_drum
+    JMP output_drum_mix
 
-.need_kick_end
+.kick_finished
     LDA #0
     STA drum_flag
-    STA drum_delay
-    LDA drum_state
-    JMP mix_tone_drum
-
-.need_load_hat
-    LDX drum_index
-    CPX #20
-    BCS need_hat_end
-    LDA hat_data,X
-    STA drum_delay
-    INC drum_index
-    LDA drum_state
-    EOR #$0F
+    STA drum_index
+    \ Force mute state to avoid click when returning to tone
+    LDA #SN_MUTE
     STA drum_state
-    JMP mix_tone_drum
-
-.need_hat_end
-    LDA #0
-    STA drum_flag
-    STA drum_delay
-    LDA drum_state
-    JMP mix_tone_drum
-
-\ Fast path - no drum active
-.output_no_drum
-    TYA                 ; Get tone value
+    TYA                     ; Output tone only
     STA VIA_ORA
     LDA #0
     STA VIA_ORB
@@ -408,21 +392,67 @@ ORG $1100
     STA VIA_ORB
     JMP sample_decrement
     
-\ Mix tone and drum
-.mix_tone_drum
-    STA ctrl_a          ; drum value in A
-    CPY #SN_LOUD
-    BNE drum_only       ; tone is mute, use drum
-    CMP #SN_LOUD
-    BNE tone_only       ; drum is mute, use tone
-    LDA #$98            ; both loud, use mixed value (original)
-    JMP output_mixed
-.drum_only
-    LDA ctrl_a          ; use drum value
-    JMP output_mixed
-.tone_only
-    TYA                 ; use tone value
-.output_mixed
+.load_hat_sample
+    LDX drum_index
+    CPX #44                 ; Hat is now 44 bytes
+    BCS hat_finished
+    LDA hat_data,X
+    STA drum_delay
+    INC drum_index
+    \ XOR the drum state (alternating pattern)
+    LDA drum_state
+    EOR #$0F
+    STA drum_state
+    JMP output_drum_mix
+
+.hat_finished
+    LDA #0
+    STA drum_flag
+    STA drum_index  
+    \ Force mute state to avoid click when returning to tone
+    LDA #SN_MUTE
+    STA drum_state
+    TYA                     ; Output tone only
+    STA VIA_ORA
+    LDA #0
+    STA VIA_ORB
+    LDA #8
+    STA VIA_ORB
+    JMP sample_decrement
+    
+\ Fast path - no drum, output tone only
+.output_no_drum
+    TYA                     ; Get tone volume
+    STA VIA_ORA
+    LDA #0
+    STA VIA_ORB
+    LDA #8
+    STA VIA_ORB
+    JMP sample_decrement
+    
+\ Mix drum and tone
+.output_drum_mix
+    STA ctrl_a              ; Save drum value
+    
+    \ If both tone and drum are loud, mix them
+    CPY #SN_LOUD            ; Is tone loud?
+    BNE use_drum_only       ; No, use drum only
+    
+    CMP #SN_LOUD            ; Is drum loud?
+    BNE use_tone_only       ; No, use tone only
+    
+    \ Both loud - use mixed value
+    LDA #$98
+    JMP output_final
+    
+.use_drum_only
+    LDA ctrl_a              ; Use drum value
+    JMP output_final
+    
+.use_tone_only
+    TYA                     ; Use tone value
+    
+.output_final
     STA VIA_ORA
     LDA #0
     STA VIA_ORB
@@ -530,17 +560,19 @@ ORG $1100
 .fetch_done
     RTS
 
+\ FIXED: Kick drum - Z80 values divided by 8, ends cleanly
+\ Z80: ds 4,#10 / ds 4,#20 / ds 4,#40 / ds 4,#80 / ds 4,0
+\ Last section (ds 4,0) removed to avoid end squawk
 .kick_data
-    EQUB 1,1,1,1,2,2,2,2
-    EQUB 3,3,3,4,4,4,5,5
-    EQUB 6,6,7,7
+    EQUB 2,2,2,2
+    EQUB 4,4,4,4
+    EQUB 8,8,8,8
+    EQUB 16,16,16,16
 
+\ FIXED: Hat - using first section of Z80 data, divided by ~5 for snappier sound
+\ Original Z80 first section, scaled to preserve variation
 .hat_data
-    EQUB 16,3,12,6,9
-    EQUB 20,4,8,2,14
-    EQUB 9,17,5,8,12
-    EQUB 4,7,16,13,22
-    EQUB 5,3,16,3,12
+    EQUB 3,1,2,1,2,4,1,2,1,3,2,3,1,2,2,1,1,3,3,4,1,1,3,1,2,1,2,4,1,2,1,3,2,3,1,2,2,1,1,3,3,4,1,1
 
 .init_hw
     LDA #$9F
@@ -576,11 +608,13 @@ SAVE "MAIN",start,end
 SCREEN_START = &7c00
 
 PRINT "-------------------------------------"
-PRINT "       SQUEEKER PLUS - FIXED         "
+PRINT "    SQUEEKER PLUS - DRUMS FIXED      "
 PRINT "-------------------------------------"
 PRINT "CODE size    = ", ~end-start
 PRINT "RAM FREE     = ", SCREEN_START-P%, "BYTES"
 PRINT "Sample rate  = ", SAMPLES_PER_FRAME*50, "Hz"
+PRINT "Kick length  = ", 16, "samples"
+PRINT "Hat length   = ", 44, "samples"
 PRINT "-------------------------------------"
 
 PUTBASIC "loader.bas","LOADER"
