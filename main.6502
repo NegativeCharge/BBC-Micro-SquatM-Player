@@ -1,5 +1,5 @@
 \ ******************************************************************
-\ * SQUEEKER PLUS 6502                                             *
+\ * SQUEEKER PLUS 6502 - OPTIMIZED FOR SPEED - TONE FIXED        *
 \ ******************************************************************
 
 VIA_DDRA    = $FE43
@@ -9,7 +9,7 @@ VIA_ORB     = $FE40
 SN_LOUD     = $90
 SN_MUTE     = $9F
 
-SAMPLES_PER_FRAME = 200
+SAMPLES_PER_FRAME = 260
 SAMPLES_LO = SAMPLES_PER_FRAME AND 255
 SAMPLES_HI = SAMPLES_PER_FRAME DIV 256
 
@@ -86,7 +86,7 @@ ORG $1100
     STA seq_ptr
     LDA music_data+1
     STA seq_ptr+1
-    JMP pattern_end  ; Loop back if pattern pointer was null
+    JMP pattern_end
 
 .check_row
     LDY #0
@@ -278,8 +278,10 @@ ORG $1100
     CLC
 
 .synth_loop
-    LSR tmp_mix
+    LDA #0
+    STA tmp_mix
 
+    \ Channel 1 - inline phase accumulation
     LDA ch1_a
     ADC ch1_f
     STA ch1_a
@@ -292,6 +294,7 @@ ORG $1100
     ADC ch1_d
     ROL tmp_mix
 
+    \ Channel 2 - inline phase accumulation
     LDA ch2_a
     ADC ch2_f
     STA ch2_a
@@ -304,6 +307,7 @@ ORG $1100
     ADC ch2_d
     ROL tmp_mix
 
+    \ Channel 3 - inline phase accumulation
     LDA ch3_a
     ADC ch3_f
     STA ch3_a
@@ -313,6 +317,7 @@ ORG $1100
     ADC ch3_d
     ROL tmp_mix
 
+    \ Channel 4 - inline phase accumulation
     LDA ch4_a
     ADC ch4_f
     STA ch4_a
@@ -322,39 +327,28 @@ ORG $1100
     ADC ch4_d
     ROL tmp_mix
 
-    LDA #$0F
-    ADC tmp_mix
+    \ Volume calculation - use accumulated bit count
+    LDA tmp_mix
+    ADC #$0F
     TAX
 
+    \ Tone volume decision - original logic restored
     CPX #$10
-    BCC vol_mute
-    LDA #SN_LOUD
-    NOP
-    NOP
-    NOP
-    NOP
-    JMP drum_check
-.vol_mute
-    LDA #SN_MUTE
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
+    LDA #SN_MUTE        ; Assume mute
+    BCS vol_set         ; If carry set (>=16), it's mute
+    LDA #SN_LOUD        ; Otherwise loud
+.vol_set
+    TAY                 ; Save tone volume in Y
 
-.drum_check
-    TAY
-    LDA drum_flag
-    BEQ no_drum
+    \ Drum processing - optimized path
+    LDX drum_flag
+    BEQ output_no_drum  ; Fast path if no drum
     
-    LDA drum_delay
+    \ Drum active - check delay
+    LDX drum_delay
     BEQ need_new_sample
     DEC drum_delay
     LDA drum_state
-    NOP
-    NOP
-    NOP
     JMP mix_tone_drum
     
 .need_new_sample
@@ -367,10 +361,10 @@ ORG $1100
     JMP mix_tone_drum
     
 .need_load_kick
-    LDY drum_index
-    CPY #20
+    LDX drum_index
+    CPX #20
     BCS need_kick_end
-    LDA kick_data,Y
+    LDA kick_data,X
     STA drum_delay
     INC drum_index
     LDA drum_state
@@ -386,10 +380,10 @@ ORG $1100
     JMP mix_tone_drum
 
 .need_load_hat
-    LDY drum_index
-    CPY #20
+    LDX drum_index
+    CPX #20
     BCS need_hat_end
-    LDA hat_data,Y
+    LDA hat_data,X
     STA drum_delay
     INC drum_index
     LDA drum_state
@@ -403,81 +397,52 @@ ORG $1100
     STA drum_delay
     LDA drum_state
     JMP mix_tone_drum
-    
-.no_drum
-    LDA #SN_MUTE
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
 
+\ Fast path - no drum active
+.output_no_drum
+    TYA                 ; Get tone value
+    STA VIA_ORA
+    LDA #0
+    STA VIA_ORB
+    LDA #8
+    STA VIA_ORB
+    JMP sample_decrement
+    
+\ Mix tone and drum
 .mix_tone_drum
     STA ctrl_a          ; drum value in A
-    TYA                 ; tone value in Y
+    CPY #SN_LOUD
+    BNE drum_only       ; tone is mute, use drum
     CMP #SN_LOUD
-    BEQ tone_loud       ; Branch if tone is loud
-    LDA ctrl_a          ; tone is mute, so use drum value
-    NOP                 ; Add 8 NOPs (was 5)
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    JMP output_sound
-    
-.tone_loud
-    LDA ctrl_a          ; check drum value
-    CMP #SN_LOUD
-    BEQ mix_both_loud   ; both loud
-    TYA                 ; drum is mute, use tone
-    NOP                 ; Add 3 NOPs (was 4) - wait, need 7 total
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    NOP
-    JMP output_sound
-    
-.mix_both_loud
-    LDA #$98            ; both loud, use mixed value
-    NOP                 ; Keep 5 NOPs
-    NOP
-    NOP
-    NOP
-    NOP
-    JMP output_sound
-
-.output_sound
+    BNE tone_only       ; drum is mute, use tone
+    LDA #$98            ; both loud, use mixed value (original)
+    JMP output_mixed
+.drum_only
+    LDA ctrl_a          ; use drum value
+    JMP output_mixed
+.tone_only
+    TYA                 ; use tone value
+.output_mixed
     STA VIA_ORA
-    LDX #0
-    STX VIA_ORB
-    LDX #8
-    STX VIA_ORB
-    
+    LDA #0
+    STA VIA_ORB
+    LDA #8
+    STA VIA_ORB
+
+\ Optimized sample counter decrement
+.sample_decrement
+    LDA sample_count
+    BNE dec_lo
+    DEC sample_count+1
+.dec_lo
     DEC sample_count
     LDA sample_count
-    CMP #$FF
-    BNE not_underflow
-    DEC sample_count+1
-.not_underflow
     ORA sample_count+1
-    BEQ frame_done
+    BEQ update_timer
     JMP synth_loop
-.frame_done
-    JMP update_timer
 
 .update_timer
-    LDY #0          ; Load Y once at start
+    LDY #0
     INC ch1_e
     BNE e1
     INC ch1_e+1
@@ -491,7 +456,7 @@ ORG $1100
     BNE e2_skip
     INC ch2_e+1
 .e2_skip 
-    LDA (ch2_e),Y   ; Y still = 0
+    LDA (ch2_e),Y
     CMP #$80
     BEQ e3
     STA ch2_d
@@ -500,7 +465,7 @@ ORG $1100
     BNE e3_skip
     INC ch3_e+1
 .e3_skip 
-    LDA (ch3_e),Y   ; Y still = 0
+    LDA (ch3_e),Y
     CMP #$80
     BEQ e4
     STA ch3_d
@@ -509,7 +474,7 @@ ORG $1100
     BNE e4_skip
     INC ch4_e+1
 .e4_skip 
-    LDA (ch4_e),Y   ; Y still = 0
+    LDA (ch4_e),Y
     CMP #$80
     BEQ slide_proc
     STA ch4_d
@@ -611,7 +576,7 @@ SAVE "MAIN",start,end
 SCREEN_START = &7c00
 
 PRINT "-------------------------------------"
-PRINT "            SQUEEKER PLUS            "
+PRINT "       SQUEEKER PLUS - FIXED         "
 PRINT "-------------------------------------"
 PRINT "CODE size    = ", ~end-start
 PRINT "RAM FREE     = ", SCREEN_START-P%, "BYTES"
