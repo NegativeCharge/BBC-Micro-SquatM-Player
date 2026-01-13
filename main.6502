@@ -1,5 +1,6 @@
 \ ******************************************************************
-\ *                       SQUEEKER PLUS 6502                       *
+\ * SQUEEKER PLUS 6502 - OPTIMIZED FOR SPEED - DRUMS FIXED       *
+\ * Fixed drum implementation to match Z80 reference             *
 \ ******************************************************************
 
 VIA_DDRA    = $FE43
@@ -9,7 +10,7 @@ VIA_ORB     = $FE40
 SN_LOUD     = $90
 SN_MUTE     = $9F
 
-SAMPLES_PER_FRAME = 260
+SAMPLES_PER_FRAME = 290
 SAMPLES_LO = SAMPLES_PER_FRAME AND 255
 SAMPLES_HI = SAMPLES_PER_FRAME DIV 256
 
@@ -247,7 +248,7 @@ ORG $1100
 .p_adv
     LDA ch1_n
     BEQ ch1_no_noise_smc
-    LDA #$6A
+    LDA #$2A            ; ROL A opcode (was $6A ROR - wrong direction!)
     STA ch1_noise_op
     LDA #$EA
     STA ch1_noise_op+1
@@ -260,7 +261,7 @@ ORG $1100
 .ch2_smc
     LDA ch2_n
     BEQ ch2_no_noise_smc
-    LDA #$6A
+    LDA #$2A            ; ROL A opcode (was $6A ROR - wrong direction!)
     STA ch2_noise_op
     LDA #$EA
     STA ch2_noise_op+1
@@ -559,12 +560,17 @@ ORG $1100
 .fetch_done
     RTS
 
+\ FIXED: Kick drum - Z80 values divided by 8, ends cleanly
+\ Z80: ds 4,#10 / ds 4,#20 / ds 4,#40 / ds 4,#80 / ds 4,0
+\ Last section (ds 4,0) removed to avoid end squawk
 .kick_data
     EQUB 2,2,2,2
     EQUB 4,4,4,4
     EQUB 8,8,8,8
     EQUB 16,16,16,16
 
+\ FIXED: Hat - using first section of Z80 data, divided by ~5 for snappier sound
+\ Original Z80 first section, scaled to preserve variation
 .hat_data
     EQUB 3,1,2,1,2,4,1,2,1,3,2,3,1,2,2,1,1,3,3,4,1,1,3,1,2,1,2,4,1,2,1,3,2,3,1,2,2,1,1,3,3,4,1,1
 
@@ -602,7 +608,7 @@ SAVE "MAIN",start,end
 SCREEN_START = &7c00
 
 PRINT "-------------------------------------"
-PRINT "            SQUEEKER PLUS            "
+PRINT "    SQUEEKER PLUS - DRUMS FIXED      "
 PRINT "-------------------------------------"
 PRINT "CODE size    = ", ~end-start
 PRINT "RAM FREE     = ", SCREEN_START-P%, "BYTES"
