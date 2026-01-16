@@ -137,11 +137,13 @@ ORG $1100
     TYA:CLC:ADC pat_ptr:STA pat_ptr
     BCC p_adv:INC pat_ptr+1
 .p_adv
-
-\ --- NOISE SMC SETUP (Replicating Z80 RLC H) ---
-    LDA ch1_n:BEQ c1_tone
-    LDA #$26:STA ch1_noise_op      ; ASL zp
-    LDA #ch1_a+1:STA ch1_noise_op+1
+    \ --- Channel 1 Noise ---
+    LDA ch1_n
+    BEQ c1_tone
+    LDA #$26        ; ROL ZeroPage (Rotation through Carry)
+    STA ch1_noise_op
+    LDA #ch1_a+1
+    STA ch1_noise_op+1
     BNE c2_check
 .c1_tone
     LDA #$EA:STA ch1_noise_op:STA ch1_noise_op+1
@@ -194,36 +196,35 @@ ORG $1100
     STA sample_count:CLC
 
 .synth_loop
-    LDA #0          ; 2
-    STA tmp_mix     ; 3
-    CLC             ; 2
+    CLC                 ; Clear carry for first channel
+    LDA #0:STA tmp_mix  ; Reset mixer bit accumulator
 
-    \ --- Channel 1 (18 Cycles) ---
-    LDA ch1_a:ADC ch1_f:STA ch1_a       ; 8
-    LDA ch1_a+1:ADC ch1_f+1:STA ch1_a+1 ; 8
+    \ --- Channel 1 ---
+    LDA ch1_a:ADC ch1_f:STA ch1_a
+    LDA ch1_a+1:ADC ch1_f+1:STA ch1_a+1
 .ch1_noise_op
-    NOP:NOP         ; 4 (SMC: ASL zp = 5)
-    LDA ch1_a+1:ADC ch1_d:ROL tmp_mix   ; 8
-    \ (Subtotal 18 or 19 with noise)
+    NOP:NOP             ; SMC: ROL ch1_a+1 ($26, $zp)
+    LDA ch1_a+1:ADC ch1_d:ROL tmp_mix
 
-    \ --- Channel 2 (18 Cycles) ---
-    LDA ch2_a:ADC ch2_f:STA ch2_a       ; 8
-    LDA ch2_a+1:ADC ch2_f+1:STA ch2_a+1 ; 8
+    \ --- Channel 2 ---
+    LDA ch2_a:ADC ch2_f:STA ch2_a
+    LDA ch2_a+1:ADC ch2_f+1:STA ch2_a+1
 .ch2_noise_op
-    NOP:NOP         ; 4
-    LDA ch2_a+1:ADC ch2_d:ROL tmp_mix   ; 8
+    NOP:NOP             ; SMC: ROL ch2_a+1
+    LDA ch2_a+1:ADC ch2_d:ROL tmp_mix
 
-    \ --- Channel 3 (18 Cycles) ---
-    LDA ch3_a:ADC ch3_f:STA ch3_a       ; 8
-    LDA ch3_a+1:ADC ch3_f+1:STA ch3_a+1 ; 8
-    NOP:NOP         ; 4  <-- PADDING TO MATCH SMC OVERHEAD
-    LDA ch3_a+1:ADC ch3_d:ROL tmp_mix   ; 8
+    \ --- Channel 3 ---
+    LDA ch3_a:ADC ch3_f:STA ch3_a
+    LDA ch3_a+1:ADC ch3_f+1:STA ch3_a+1
+    BIT $00             ; Padding: 3 cycles (Z80 noise overhead)
+    NOP                 ; Padding: 2 cycles
+    LDA ch3_a+1:ADC ch3_d:ROL tmp_mix
 
-    \ --- Channel 4 (18 Cycles) ---
-    LDA ch4_a:ADC ch4_f:STA ch4_a       ; 8
-    LDA ch4_a+1:ADC ch4_f+1:STA ch4_a+1 ; 8
-    NOP:NOP         ; 4  <-- PADDING TO MATCH SMC OVERHEAD
-    LDA ch4_a+1:ADC ch4_d:ROL tmp_mix   ; 8
+    \ --- Channel 4 ---
+    LDA ch4_a:ADC ch4_f:STA ch4_a
+    LDA ch4_a+1:ADC ch4_f+1:STA ch4_a+1
+    BIT $00:NOP         ; Same padding
+    LDA ch4_a+1:ADC ch4_d:ROL tmp_mix
 
     \ --- Volume & Output (Approx 18-20 Cycles) ---
     LDA #$0F:ADC tmp_mix:CMP #$10       ; 7
@@ -251,9 +252,13 @@ ORG $1100
 
 .slide_proc
     LDA ch4_s:BEQ noslide
-    LDA ch4_f+1:LSR A:TAX
-    LDA ch4_f:ROR A:TAY
-    SEC:LDA ch4_f:STY tmp_mix:SBC tmp_mix:STA ch4_f
+    \ Calculate shift: (Frequency / 2)
+    LDA ch4_f+1:LSR A:TAX       ; High byte / 2
+    LDA ch4_f:ROR A:TAY         ; Low byte / 2 (receives bit from High)
+    
+    \ Perform 16-bit Subtraction: Frequency = Frequency - (Frequency / 2)
+    SEC                         ; Prepare for 16-bit subtract
+    LDA ch4_f:STY tmp_mix:SBC tmp_mix:STA ch4_f
     LDA ch4_f+1:STX tmp_mix:SBC tmp_mix:STA ch4_f+1
 .noslide
     DEC row_timer:BNE play_same_row:JMP check_row
