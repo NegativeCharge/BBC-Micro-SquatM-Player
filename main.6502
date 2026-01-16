@@ -1,6 +1,7 @@
 \ ******************************************************************
 \ *                       SQUEEKER PLUS 6502                       *
-\ *              DRUMS PROCESSED DURING SYNTH (WORKING)            *
+\ *              DRUMS BLOCKING (MATCHING Z80 REFERENCE)           *
+\ *                    WITH WE HELD LOW OPTIMIZATION               *
 \ ******************************************************************
 
 VIA_DDRA    = $FE43
@@ -10,7 +11,7 @@ VIA_ORB     = $FE40
 SN_LOUD     = $90
 SN_MUTE     = $9F
 
-SAMPLES_PER_FRAME = 290
+SAMPLES_PER_FRAME = 260
 SAMPLES_LO = SAMPLES_PER_FRAME AND 255
 SAMPLES_HI = SAMPLES_PER_FRAME DIV 256
 
@@ -23,10 +24,7 @@ ORG 0
 .ctrl_a         SKIP 1
 .ctrl_b         SKIP 1
 .pat_ptr        SKIP 2
-.drum_flag      SKIP 1
-.drum_index     SKIP 1
-.drum_delay     SKIP 1
-.drum_state     SKIP 1
+.drum_trigger   SKIP 1      ; 0=none, 1=kick, 2=hat
 
 .ch1_f          SKIP 2
 .ch1_a          SKIP 2
@@ -50,6 +48,14 @@ ORG 0
 .ch4_e          SKIP 2
 .ch4_d          SKIP 1
 .ch4_s          SKIP 1
+
+.kick_vol       SKIP 1
+.kick_idx       SKIP 1
+.kick_count     SKIP 1
+
+.hat_vol        SKIP 1
+.hat_idx        SKIP 1
+.hat_count      SKIP 1
 
 ORG $1100
 .start
@@ -186,30 +192,20 @@ ORG $1100
     INY
     INY
     
-    \ Trigger drums
+    \ Check for drum triggers
     LDA #0
-    STA drum_flag
+    STA drum_trigger
     LDA ctrl_b
     AND #$04
     BEQ no_kick
     LDA #1
-    STA drum_flag
-    LDA #0
-    STA drum_index
-    STA drum_delay
-    LDA #SN_LOUD
-    STA drum_state
+    STA drum_trigger
 .no_kick
     LDA ctrl_b
     AND #$80
     BEQ no_hat
     LDA #2
-    STA drum_flag
-    LDA #0
-    STA drum_index
-    STA drum_delay
-    LDA #SN_LOUD
-    STA drum_state
+    STA drum_trigger
 .no_hat
     
     LDA ctrl_b
@@ -266,12 +262,120 @@ ORG $1100
     STA ch2_noise_op
     LDA #$EA
     STA ch2_noise_op+1
-    JMP start_synth
+    JMP check_drum_trigger
 .ch2_no_noise_smc
     LDA #$EA
     STA ch2_noise_op
     STA ch2_noise_op+1
+
+\ *** PLAY DRUM IF TRIGGERED (BLOCKING) ***
+.check_drum_trigger
+    LDA drum_trigger
+    BNE skip_this
+    JMP start_synth
+.skip_this
+    CMP #1
+    BEQ play_kick
+    JMP play_hat
+
+.play_kick
+    LDA #20
+    STA kick_count      ; Initialize outer loop
+    LDA #0
+    STA kick_idx        ; Initialize table index
+    LDA #SN_MUTE        ; Usually $00
+    STA kick_vol
+
+.kick_loop
+    ; --- Toggle Volume ---
+    LDA kick_vol
+    EOR #$0F            ; Toggle MUTE <-> LOUD
+    STA kick_vol        ; Update ZP storage
+    STA VIA_ORA         ; Output to VIA Data Port
     
+    ; --- Toggle Handshake (Manual pulse) ---
+    LDY #0
+    STY VIA_ORB         ; WE Low
+    LDY #8
+    STY VIA_ORB         ; WE High
+
+    ; --- Fetch Delay Value ---
+    LDY kick_idx
+    LDA kick_data,Y
+    STA tmp_mix         ; Store in ZP for the inner loop
+    INC kick_idx
+    
+    ; --- Preparation for Inner Loop ---
+    ; We pre-load A with the volume so it stays there
+    LDA kick_vol
+    LDX #0              ; Constant for WE Low
+    LDY #8              ; Constant for WE High
+
+.kick_delay
+    STA VIA_ORA         ; [4 cycles] Output volume
+    
+    STX VIA_ORB         ; [4 cycles] WE Low
+    STY VIA_ORB         ; [4 cycles] WE High
+
+    DEC tmp_mix         ; [5 cycles] Decrement delay
+    BNE kick_delay      ; [3 cycles] Loop until 0
+    
+    ; --- Outer Loop Logic ---
+    DEC kick_count
+    BNE kick_loop
+    
+    STX VIA_ORB         ; Ensure WE is released
+    JMP start_synth
+
+.play_hat
+    LDA #197
+    STA hat_count       ; ZP outer loop counter
+    LDA #0
+    STA hat_idx         ; ZP table index
+    LDA #SN_MUTE        ; Usually $00
+    STA hat_vol         ; ZP volume storage
+
+.hat_loop
+    ; --- Toggle Volume ---
+    LDA hat_vol
+    EOR #$0F            ; Toggle MUTE <-> LOUD
+    STA hat_vol
+    STA VIA_ORA         ; Output to VIA
+    
+    ; --- Toggle Handshake ---
+    LDY #0
+    STY VIA_ORB         ; WE Low
+    LDY #8
+    STY VIA_ORB         ; WE High
+
+    ; --- Fetch Delay Value ---
+    LDY hat_idx
+    LDA hat_data,Y
+    STA tmp_mix         ; Store delay in ZP
+    INC hat_idx
+    
+    ; --- Prepare Inner Loop ---
+    ; Lock registers: A=Volume, X=0 (WE Low), Y=8 (WE High)
+    LDA hat_vol
+    LDX #0
+    LDY #8
+
+.hat_delay
+    STA VIA_ORA         ; [4] Update Data
+    STX VIA_ORB         ; [4] WE Low (X=0)
+    STY VIA_ORB         ; [4] WE High (Y=8)
+
+    DEC tmp_mix         ; [5] 
+    BNE hat_delay       ; [3] 
+    
+    ; --- Outer Loop Logic ---
+    DEC hat_count       ; 197 iterations
+    BNE hat_loop
+    
+    STX VIA_ORB         ; Final release (X is still 0)
+
+
+\ *** SYNTH LOOP (NO DRUM PROCESSING) ***    
 .start_synth
     LDA #SAMPLES_LO
     STA sample_count
@@ -338,75 +442,6 @@ ORG $1100
     BCS vol_set
     LDA #SN_MUTE
 .vol_set
-    TAY                     ; Y = tone volume
-
-    \ Process drum (8x unrolled for correct speed)
-    LDX drum_flag
-    BEQ output_tone
-    
-    LDA drum_delay
-    BNE d1
-    JSR load_drum_sample
-    LDA drum_delay
-    BEQ output_tone
-.d1 DEC drum_delay
-    
-    LDA drum_delay
-    BNE d2
-    JSR load_drum_sample
-    LDA drum_delay
-    BEQ output_tone
-.d2 DEC drum_delay
-    
-    LDA drum_delay
-    BNE d3
-    JSR load_drum_sample
-    LDA drum_delay
-    BEQ output_tone
-.d3 DEC drum_delay
-    
-    LDA drum_delay
-    BNE d4
-    JSR load_drum_sample
-    LDA drum_delay
-    BEQ output_tone
-.d4 DEC drum_delay
-    
-    LDA drum_delay
-    BNE d5
-    JSR load_drum_sample
-    LDA drum_delay
-    BEQ output_tone
-.d5 DEC drum_delay
-    
-    LDA drum_delay
-    BNE d6
-    JSR load_drum_sample
-    LDA drum_delay
-    BEQ output_tone
-.d6 DEC drum_delay
-    
-    LDA drum_delay
-    BNE d7
-    JSR load_drum_sample
-    LDA drum_delay
-    BEQ output_tone
-.d7 DEC drum_delay
-    
-    LDA drum_delay
-    BNE output_drum
-    JSR load_drum_sample
-    LDA drum_delay
-    BEQ output_tone
-    
-.output_drum
-    LDA drum_state
-    JMP output_sn
-    
-.output_tone
-    TYA
-
-.output_sn
     STA VIA_ORA
     LDA #0
     STA VIA_ORB
@@ -422,48 +457,6 @@ ORG $1100
     ORA sample_count+1
     BEQ update_timer
     JMP synth_loop
-
-.load_drum_sample
-    LDX drum_flag
-    DEX
-    BEQ load_kick
-    DEX
-    BEQ load_hat
-    RTS
-    
-.load_kick
-    LDX drum_index
-    CPX #20
-    BCS kick_end
-    LDA kick_data,X
-    STA drum_delay
-    INC drum_index
-    LDA drum_state
-    EOR #$0F
-    STA drum_state
-    RTS
-.kick_end
-    LDA #0
-    STA drum_flag
-    STA drum_delay
-    RTS
-    
-.load_hat
-    LDX drum_index
-    CPX #197
-    BCS hat_end
-    LDA hat_data,X
-    STA drum_delay
-    INC drum_index
-    LDA drum_state
-    EOR #$0F
-    STA drum_state
-    RTS
-.hat_end
-    LDA #0
-    STA drum_flag
-    STA drum_delay
-    RTS
 
 .update_timer
     LDY #0
@@ -555,7 +548,7 @@ ORG $1100
     RTS
 
 .kick_data
-    EQUB 16,16,16,16
+    EQUB 16,16,16,16    ; Match Z80 exactly
     EQUB 32,32,32,32
     EQUB 64,64,64,64
     EQUB 128,128,128,128
