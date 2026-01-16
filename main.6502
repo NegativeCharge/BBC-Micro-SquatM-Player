@@ -172,7 +172,8 @@ ORG $1100
     STA VIA_ORA:STX VIA_ORB:NOP:NOP:STY VIA_ORB
     DEC tmp_mix:BNE hat_delay
     DEC hat_count:BNE hat_loop
-    STX VIA_ORB:LDA #$6D:BNE start_synth_short
+    STX VIA_ORB
+    JMP update_timer    ; <--- FIX: Ensure we advance the song after drum
 
 .play_kick
     LDA #20:STA kick_count:LDA #0:STA kick_idx:LDA #SN_MUTE:STA kick_vol
@@ -185,19 +186,15 @@ ORG $1100
     STA VIA_ORA:STX VIA_ORB:NOP:NOP:STY VIA_ORB
     DEC tmp_mix:BNE kick_delay
     DEC kick_count:BNE kick_loop
-    STX VIA_ORB:LDA #$6D
+    STX VIA_ORB
+    JMP update_timer    ; <--- FIX: Ensure we advance the song after drum
 
 .start_synth
     LDA #SAMPLES_HI:STA sample_count+1
-    LDA #SAMPLES_LO:BNE synth_store
-.start_synth_short
-    LDX #0:STX sample_count+1
-.synth_store
-    STA sample_count:CLC
-
+    LDA #SAMPLES_LO:STA sample_count
 .synth_loop
-    CLC                 ; Clear carry for first channel
-    LDA #0:STA tmp_mix  ; Reset mixer bit accumulator
+    CLC
+    LDA #0:STA tmp_mix
 
     \ --- Channel 1 ---
     LDA ch1_a:ADC ch1_f:STA ch1_a
@@ -226,18 +223,22 @@ ORG $1100
     BIT $00:NOP         ; Same padding
     LDA ch4_a+1:ADC ch4_d:ROL tmp_mix
 
-    \ --- Volume & Output (Approx 18-20 Cycles) ---
-    LDA #$0F:ADC tmp_mix:CMP #$10       ; 7
-    LDA #SN_LOUD:BCS vol_set:LDA #SN_MUTE ; 5-6
+    \ --- Corrected Mixer ---
+    LDA tmp_mix         ; Check if any bits were shifted in
+    BEQ is_mute        ; If 0, all channels were low
+    LDA #SN_LOUD        ; Else, at least one channel is high
+    BNE vol_set        ; Branch always
+.is_mute
+    LDA #SN_MUTE
 .vol_set
-    STA VIA_ORA     ; 4
-    LDA #0:STA VIA_ORB:LDA #8:STA VIA_ORB ; 10 (WE Pulse)
+    STA VIA_ORA
+    LDA #0:STA VIA_ORB:LDA #8:STA VIA_ORB
 
     \ --- Loop Control ---
-    DEC sample_count                    ; 5
-    BNE synth_loop                      ; 3 (back to top)
-    DEC sample_count+1                  ; 5
-    BPL synth_loop                      ; 3
+    DEC sample_count
+    BNE synth_loop
+    DEC sample_count+1
+    BPL synth_loop      ; This marks the end of ONE tick
 
 .update_timer
     LDY #0
