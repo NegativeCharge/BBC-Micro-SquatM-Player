@@ -1,7 +1,6 @@
 \ ******************************************************************
-\ *                       SQUEEKER PLUS 6502                       *
-\ *              DRUMS BLOCKING (MATCHING Z80 REFERENCE)           *
-\ *                    WITH WE HELD LOW OPTIMIZATION               *
+\ * SQUEEKER PLUS 6502 (FINAL)                     *
+\ * ACCURATE Z80 NOISE & MIXING EMULATION                *
 \ ******************************************************************
 
 VIA_DDRA    = $FE43
@@ -16,7 +15,6 @@ SAMPLES_LO = SAMPLES_PER_FRAME AND 255
 SAMPLES_HI = SAMPLES_PER_FRAME DIV 256
 
 ORG 0
-
 .seq_ptr        SKIP 2
 .row_timer      SKIP 1
 .sample_count   SKIP 2
@@ -72,488 +70,209 @@ ORG $1100
 
 .pattern_end 
     LDA seq_ptr
-    CLC
-    ADC #2
-    STA seq_ptr
-    BCC p_next
-    INC seq_ptr+1
+    CLC:ADC #2:STA seq_ptr
+    BCC p_next:INC seq_ptr+1
 .p_next
-    LDY #0
-    LDA (seq_ptr),Y
-    STA pat_ptr
-    INY
-    LDA (seq_ptr),Y
-    STA pat_ptr+1
-    
-    LDA pat_ptr
-    ORA pat_ptr+1
+    LDY #0:LDA (seq_ptr),Y:STA pat_ptr
+    INY:LDA (seq_ptr),Y:STA pat_ptr+1
+    LDA pat_ptr:ORA pat_ptr+1
     BNE check_row
-    
-    LDA music_data
-    STA seq_ptr
-    LDA music_data+1
-    STA seq_ptr+1
+    LDA music_data:STA seq_ptr
+    LDA music_data+1:STA seq_ptr+1
     JMP pattern_end
 
 .check_row
-    LDY #0
-    LDA (pat_ptr),Y
-    CMP #$40
-    BEQ pattern_end
+    LDY #0:LDA (pat_ptr),Y
+    CMP #$40:BEQ pattern_end
 
 .rdseq
-    LDA (pat_ptr),Y
-    INY
-    STA ctrl_a
-    LDA (pat_ptr),Y
-    INY
-    STA row_timer
-       
-    LDA (pat_ptr),Y
-    STA ch2_n
-    INY
-    LDA (pat_ptr),Y
-    STA ch1_n
-    INY
+    LDA (pat_ptr),Y:INY:STA ctrl_a
+    LDA (pat_ptr),Y:INY:STA row_timer
+    LDA (pat_ptr),Y:STA ch2_n:INY
+    LDA (pat_ptr),Y:STA ch1_n:INY
 
-    LDA ctrl_a
-    LSR A
-    BCS ld2
-    LDA (pat_ptr),Y
-    STA ch1_f
-    INY
-    LDA (pat_ptr),Y
-    STA ch1_f+1
-    INY
-    LDA (pat_ptr),Y
-    STA ch1_e
-    INY
-    LDA (pat_ptr),Y
-    STA ch1_e+1
-    INY
-    LDA #0
-    STA ch1_a
-    STA ch1_a+1
-    STY tmp_mix
-    LDY #0
-    LDA (ch1_e),Y
-    STA ch1_d
-    LDY tmp_mix
+    LDA ctrl_a:LSR A:BCS ld2
+    LDA (pat_ptr),Y:STA ch1_f:INY
+    LDA (pat_ptr),Y:STA ch1_f+1:INY
+    LDA (pat_ptr),Y:STA ch1_e:INY
+    LDA (pat_ptr),Y:STA ch1_e+1:INY
+    LDA #0:STA ch1_a:STA ch1_a+1
+    STY tmp_mix:LDY #0:LDA (ch1_e),Y:STA ch1_d:LDY tmp_mix
 .ld2
-    LDA ctrl_a
-    AND #4
-    BNE ld3
-    LDA (pat_ptr),Y
-    STA ch2_f
-    INY
-    LDA (pat_ptr),Y
-    STA ch2_f+1
-    INY
-    LDA (pat_ptr),Y
-    STA ch2_e
-    INY
-    LDA (pat_ptr),Y
-    STA ch2_e+1
-    INY
-    LDA #0
-    STA ch2_a
-    STA ch2_a+1
-    STY tmp_mix
-    LDY #0
-    LDA (ch2_e),Y
-    STA ch2_d
-    LDY tmp_mix
+    LDA ctrl_a:AND #4:BNE ld3
+    LDA (pat_ptr),Y:STA ch2_f:INY
+    LDA (pat_ptr),Y:STA ch2_f+1:INY
+    LDA (pat_ptr),Y:STA ch2_e:INY
+    LDA (pat_ptr),Y:STA ch2_e+1:INY
+    LDA #0:STA ch2_a:STA ch2_a+1
+    STY tmp_mix:LDY #0:LDA (ch2_e),Y:STA ch2_d:LDY tmp_mix
 .ld3
-    BIT ctrl_a
-    BMI ld4
-    LDA (pat_ptr),Y
-    STA ch3_f
-    INY
-    LDA (pat_ptr),Y
-    STA ch3_f+1
-    INY
-    LDA (pat_ptr),Y
-    STA ch3_e
-    INY
-    LDA (pat_ptr),Y
-    STA ch3_e+1
-    INY
-    LDA #0
-    STA ch3_a
-    STA ch3_a+1
-    STY tmp_mix
-    LDY #0
-    LDA (ch3_e),Y
-    STA ch3_d
-    LDY tmp_mix
+    BIT ctrl_a:BMI ld4
+    LDA (pat_ptr),Y:STA ch3_f:INY
+    LDA (pat_ptr),Y:STA ch3_f+1:INY
+    LDA (pat_ptr),Y:STA ch3_e:INY
+    LDA (pat_ptr),Y:STA ch3_e+1:INY
+    LDA #0:STA ch3_a:STA ch3_a+1
+    STY tmp_mix:LDY #0:LDA (ch3_e),Y:STA ch3_d:LDY tmp_mix
 .ld4
-    LDA (pat_ptr),Y
-    STA ctrl_b
-    INY
-    INY
+    LDA (pat_ptr),Y:STA ctrl_b:INY:INY
     
-    \ Check for drum triggers
-    LDA #0
-    STA drum_trigger
-    LDA ctrl_b
-    AND #$04
-    BEQ no_kick
-    LDA #1
-    STA drum_trigger
+    LDA #0:STA drum_trigger
+    LDA ctrl_b:AND #$04:BEQ no_kick
+    LDA #1:STA drum_trigger
 .no_kick
-    LDA ctrl_b
-    AND #$80
-    BEQ no_hat
-    LDA #2
-    STA drum_trigger
+    LDA ctrl_b:AND #$80:BEQ no_hat
+    LDA #2:STA drum_trigger
 .no_hat
     
-    LDA ctrl_b
-    AND #$40
-    BNE skip4
-    LDA (pat_ptr),Y
-    STA ch4_f
-    INY
-    LDA (pat_ptr),Y
-    STA ch4_f+1
-    INY
-    LDA (pat_ptr),Y
-    STA ch4_e
-    INY
-    LDA (pat_ptr),Y
-    STA ch4_e+1
-    INY
-    LDA #0
-    STA ch4_a
-    STA ch4_a+1
-    STY tmp_mix
-    LDY #0
-    LDA (ch4_e),Y
-    STA ch4_d
-    LDY tmp_mix
+    LDA ctrl_b:AND #$40:BNE skip4
+    LDA (pat_ptr),Y:STA ch4_f:INY
+    LDA (pat_ptr),Y:STA ch4_f+1:INY
+    LDA (pat_ptr),Y:STA ch4_e:INY
+    LDA (pat_ptr),Y:STA ch4_e+1:INY
+    LDA #0:STA ch4_a:STA ch4_a+1
+    STY tmp_mix:LDY #0:LDA (ch4_e),Y:STA ch4_d:LDY tmp_mix
 .skip4
-    LDA ctrl_b
-    AND #1
-    STA ch4_s
-
-    TYA
-    CLC
-    ADC pat_ptr
-    STA pat_ptr
-    BCC p_adv
-    INC pat_ptr+1
+    LDA ctrl_b:AND #1:STA ch4_s
+    TYA:CLC:ADC pat_ptr:STA pat_ptr
+    BCC p_adv:INC pat_ptr+1
 .p_adv
-    LDA ch1_n
-    BEQ ch1_no_noise_smc
-    LDA #$6A
-    STA ch1_noise_op
-    LDA #$EA
-    STA ch1_noise_op+1
-    JMP ch2_smc
-.ch1_no_noise_smc
-    LDA #$EA
-    STA ch1_noise_op
-    STA ch1_noise_op+1
-    
-.ch2_smc
-    LDA ch2_n
-    BEQ ch2_no_noise_smc
-    LDA #$6A
-    STA ch2_noise_op
-    LDA #$EA
-    STA ch2_noise_op+1
-    JMP check_drum_trigger
-.ch2_no_noise_smc
-    LDA #$EA
-    STA ch2_noise_op
-    STA ch2_noise_op+1
 
-\ *** PLAY DRUM IF TRIGGERED (BLOCKING) ***
+\ --- NOISE SMC SETUP (Replicating Z80 RLC H) ---
+    LDA ch1_n:BEQ c1_tone
+    LDA #$26:STA ch1_noise_op      ; ASL zp
+    LDA #ch1_a+1:STA ch1_noise_op+1
+    BNE c2_check
+.c1_tone
+    LDA #$EA:STA ch1_noise_op:STA ch1_noise_op+1
+.c2_check
+    LDA ch2_n:BEQ c2_tone
+    LDA #$26:STA ch2_noise_op
+    LDA #ch2_a+1:STA ch2_noise_op+1
+    BNE check_drum_trigger
+.c2_tone
+    LDA #$EA:STA ch2_noise_op:STA ch2_noise_op+1
+
 .check_drum_trigger
-    LDA drum_trigger
-    BNE skip_this
-    JMP start_synth
-.skip_this
-    CMP #1
-    BEQ play_kick
-    JMP play_hat
-
-.play_kick
-    LDA #20
-    STA kick_count      ; Initialize outer loop
-    LDA #0
-    STA kick_idx        ; Initialize table index
-    LDA #SN_MUTE        ; Usually $00
-    STA kick_vol
-
-.kick_loop
-    ; --- Toggle Volume ---
-    LDA kick_vol
-    EOR #$0F            ; Toggle MUTE <-> LOUD
-    STA kick_vol        ; Update ZP storage
-    STA VIA_ORA         ; Output to VIA Data Port
-    
-    ; --- Toggle Handshake (Manual pulse) ---
-    LDY #0
-    STY VIA_ORB         ; WE Low
-    LDY #8
-    STY VIA_ORB         ; WE High
-
-    ; --- Fetch Delay Value ---
-    LDY kick_idx
-    LDA kick_data,Y
-    STA tmp_mix         ; Store in ZP for the inner loop
-    INC kick_idx
-    
-    ; --- Preparation for Inner Loop ---
-    ; We pre-load A with the volume so it stays there
-    LDA kick_vol
-    LDX #0              ; Constant for WE Low
-    LDY #8              ; Constant for WE High
-
-.kick_delay
-    STA VIA_ORA         ; [4 cycles] Output volume
-    
-    STX VIA_ORB         ; [4 cycles] WE Low
-    STY VIA_ORB         ; [4 cycles] WE High
-
-    DEC tmp_mix         ; [5 cycles] Decrement delay
-    BNE kick_delay      ; [3 cycles] Loop until 0
-    
-    ; --- Outer Loop Logic ---
-    DEC kick_count
-    BNE kick_loop
-    
-    STX VIA_ORB         ; Ensure WE is released
-    JMP start_synth
+    LDA drum_trigger:BNE do_drums
+    JMP start_synth 
+.do_drums
+    CMP #1:BEQ play_kick
 
 .play_hat
-    LDA #197
-    STA hat_count       ; ZP outer loop counter
-    LDA #0
-    STA hat_idx         ; ZP table index
-    LDA #SN_MUTE        ; Usually $00
-    STA hat_vol         ; ZP volume storage
-
+    LDA #197:STA hat_count:LDA #0:STA hat_idx:LDA #SN_MUTE:STA hat_vol
 .hat_loop
-    ; --- Toggle Volume ---
-    LDA hat_vol
-    EOR #$0F            ; Toggle MUTE <-> LOUD
-    STA hat_vol
-    STA VIA_ORA         ; Output to VIA
-    
-    ; --- Toggle Handshake ---
-    LDY #0
-    STY VIA_ORB         ; WE Low
-    LDY #8
-    STY VIA_ORB         ; WE High
-
-    ; --- Fetch Delay Value ---
-    LDY hat_idx
-    LDA hat_data,Y
-    STA tmp_mix         ; Store delay in ZP
-    INC hat_idx
-    
-    ; --- Prepare Inner Loop ---
-    ; Lock registers: A=Volume, X=0 (WE Low), Y=8 (WE High)
-    LDA hat_vol
-    LDX #0
-    LDY #8
-
+    LDA hat_vol:EOR #$0F:STA hat_vol:STA VIA_ORA 
+    LDY #0:STY VIA_ORB:LDY #8:STY VIA_ORB
+    LDY hat_idx:LDA hat_data,Y:STA tmp_mix:INC hat_idx
+    LDA hat_vol:LDX #0:LDY #8
 .hat_delay
-    STA VIA_ORA         ; [4] Update Data
-    STX VIA_ORB         ; [4] WE Low (X=0)
-    STY VIA_ORB         ; [4] WE High (Y=8)
+    STA VIA_ORA:STX VIA_ORB:NOP:NOP:STY VIA_ORB
+    DEC tmp_mix:BNE hat_delay
+    DEC hat_count:BNE hat_loop
+    STX VIA_ORB:LDA #$6D:BNE start_synth_short
 
-    DEC tmp_mix         ; [5] 
-    BNE hat_delay       ; [3] 
-    
-    ; --- Outer Loop Logic ---
-    DEC hat_count       ; 197 iterations
-    BNE hat_loop
-    
-    STX VIA_ORB         ; Final release (X is still 0)
+.play_kick
+    LDA #20:STA kick_count:LDA #0:STA kick_idx:LDA #SN_MUTE:STA kick_vol
+.kick_loop
+    LDA kick_vol:EOR #$0F:STA kick_vol:STA VIA_ORA
+    LDY #0:STY VIA_ORB:LDY #8:STY VIA_ORB
+    LDY kick_idx:LDA kick_data,Y:STA tmp_mix:INC kick_idx
+    LDA kick_vol:LDX #0:LDY #8
+.kick_delay
+    STA VIA_ORA:STX VIA_ORB:NOP:NOP:STY VIA_ORB
+    DEC tmp_mix:BNE kick_delay
+    DEC kick_count:BNE kick_loop
+    STX VIA_ORB:LDA #$6D
 
-
-\ *** SYNTH LOOP (NO DRUM PROCESSING) ***    
 .start_synth
-    LDA #SAMPLES_LO
-    STA sample_count
-    LDA #SAMPLES_HI
-    STA sample_count+1
-    CLC
+    LDA #SAMPLES_HI:STA sample_count+1
+    LDA #SAMPLES_LO:BNE synth_store
+.start_synth_short
+    LDX #0:STX sample_count+1
+.synth_store
+    STA sample_count:CLC
 
 .synth_loop
-    LDA #0
-    STA tmp_mix
+    LDA #0          ; 2
+    STA tmp_mix     ; 3
+    CLC             ; 2
 
-    \ Channel 1
-    LDA ch1_a
-    ADC ch1_f
-    STA ch1_a
-    LDA ch1_a+1
-    ADC ch1_f+1
-    STA ch1_a+1
+    \ --- Channel 1 (18 Cycles) ---
+    LDA ch1_a:ADC ch1_f:STA ch1_a       ; 8
+    LDA ch1_a+1:ADC ch1_f+1:STA ch1_a+1 ; 8
 .ch1_noise_op
-    NOP
-    NOP
-    ADC ch1_d
-    ROL tmp_mix
+    NOP:NOP         ; 4 (SMC: ASL zp = 5)
+    LDA ch1_a+1:ADC ch1_d:ROL tmp_mix   ; 8
+    \ (Subtotal 18 or 19 with noise)
 
-    \ Channel 2
-    LDA ch2_a
-    ADC ch2_f
-    STA ch2_a
-    LDA ch2_a+1
-    ADC ch2_f+1
-    STA ch2_a+1
+    \ --- Channel 2 (18 Cycles) ---
+    LDA ch2_a:ADC ch2_f:STA ch2_a       ; 8
+    LDA ch2_a+1:ADC ch2_f+1:STA ch2_a+1 ; 8
 .ch2_noise_op
-    NOP
-    NOP
-    ADC ch2_d
-    ROL tmp_mix
+    NOP:NOP         ; 4
+    LDA ch2_a+1:ADC ch2_d:ROL tmp_mix   ; 8
 
-    \ Channel 3
-    LDA ch3_a
-    ADC ch3_f
-    STA ch3_a
-    LDA ch3_a+1
-    ADC ch3_f+1
-    STA ch3_a+1
-    ADC ch3_d
-    ROL tmp_mix
+    \ --- Channel 3 (18 Cycles) ---
+    LDA ch3_a:ADC ch3_f:STA ch3_a       ; 8
+    LDA ch3_a+1:ADC ch3_f+1:STA ch3_a+1 ; 8
+    NOP:NOP         ; 4  <-- PADDING TO MATCH SMC OVERHEAD
+    LDA ch3_a+1:ADC ch3_d:ROL tmp_mix   ; 8
 
-    \ Channel 4
-    LDA ch4_a
-    ADC ch4_f
-    STA ch4_a
-    LDA ch4_a+1
-    ADC ch4_f+1
-    STA ch4_a+1
-    ADC ch4_d
-    ROL tmp_mix
+    \ --- Channel 4 (18 Cycles) ---
+    LDA ch4_a:ADC ch4_f:STA ch4_a       ; 8
+    LDA ch4_a+1:ADC ch4_f+1:STA ch4_a+1 ; 8
+    NOP:NOP         ; 4  <-- PADDING TO MATCH SMC OVERHEAD
+    LDA ch4_a+1:ADC ch4_d:ROL tmp_mix   ; 8
 
-    \ Volume
-    LDA tmp_mix
-    ADC #$0F
-    TAX
-    CPX #$10
-    LDA #SN_LOUD
-    BCS vol_set
-    LDA #SN_MUTE
+    \ --- Volume & Output (Approx 18-20 Cycles) ---
+    LDA #$0F:ADC tmp_mix:CMP #$10       ; 7
+    LDA #SN_LOUD:BCS vol_set:LDA #SN_MUTE ; 5-6
 .vol_set
-    STA VIA_ORA
-    LDA #0
-    STA VIA_ORB
-    LDA #8
-    STA VIA_ORB
+    STA VIA_ORA     ; 4
+    LDA #0:STA VIA_ORB:LDA #8:STA VIA_ORB ; 10 (WE Pulse)
 
-    LDA sample_count
-    BNE dec_lo
-    DEC sample_count+1
-.dec_lo
-    DEC sample_count
-    LDA sample_count
-    ORA sample_count+1
-    BEQ update_timer
-    JMP synth_loop
+    \ --- Loop Control ---
+    DEC sample_count                    ; 5
+    BNE synth_loop                      ; 3 (back to top)
+    DEC sample_count+1                  ; 5
+    BPL synth_loop                      ; 3
 
 .update_timer
     LDY #0
-    INC ch1_e
-    BNE e1
-    INC ch1_e+1
-.e1 
-    LDA (ch1_e),Y
-    CMP #$80
-    BEQ e2
-    STA ch1_d
-.e2 
-    INC ch2_e
-    BNE e2_skip
-    INC ch2_e+1
-.e2_skip 
-    LDA (ch2_e),Y
-    CMP #$80
-    BEQ e3
-    STA ch2_d
-.e3 
-    INC ch3_e
-    BNE e3_skip
-    INC ch3_e+1
-.e3_skip 
-    LDA (ch3_e),Y
-    CMP #$80
-    BEQ e4
-    STA ch3_d
-.e4 
-    INC ch4_e
-    BNE e4_skip
-    INC ch4_e+1
-.e4_skip 
-    LDA (ch4_e),Y
-    CMP #$80
-    BEQ slide_proc
-    STA ch4_d
+    INC ch1_e:BNE e1:INC ch1_e+1
+.e1:LDA (ch1_e),Y:CMP #$80:BEQ e2:STA ch1_d
+.e2:INC ch2_e:BNE e2_skip:INC ch2_e+1
+.e2_skip:LDA (ch2_e),Y:CMP #$80:BEQ e3:STA ch2_d
+.e3:INC ch3_e:BNE e3_skip:INC ch3_e+1
+.e3_skip:LDA (ch3_e),Y:CMP #$80:BEQ e4:STA ch3_d
+.e4:INC ch4_e:BNE e4_skip:INC ch4_e+1
+.e4_skip:LDA (ch4_e),Y:CMP #$80:BEQ slide_proc:STA ch4_d
 
 .slide_proc
-    LDA ch4_s
-    BEQ noslide
-    LDA ch4_f+1
-    LSR A
-    TAX
-    LDA ch4_f
-    ROR A
-    TAY
-    SEC
-    LDA ch4_f
-    STY tmp_mix
-    SBC tmp_mix
-    STA ch4_f
-    LDA ch4_f+1
-    STX tmp_mix
-    SBC tmp_mix
-    STA ch4_f+1
+    LDA ch4_s:BEQ noslide
+    LDA ch4_f+1:LSR A:TAX
+    LDA ch4_f:ROR A:TAY
+    SEC:LDA ch4_f:STY tmp_mix:SBC tmp_mix:STA ch4_f
+    LDA ch4_f+1:STX tmp_mix:SBC tmp_mix:STA ch4_f+1
 .noslide
-    DEC row_timer
-    BNE play_same_row
-    JMP check_row
-
+    DEC row_timer:BNE play_same_row:JMP check_row
 .play_same_row
-    LDA #SAMPLES_LO
-    STA sample_count
-    LDA #SAMPLES_HI
-    STA sample_count+1
-    CLC
-    JMP synth_loop
+    LDA #SAMPLES_LO:STA sample_count
+    LDA #SAMPLES_HI:STA sample_count+1
+    CLC:JMP synth_loop
 
 .fetch_new_pattern
-    LDY #0
-    LDA (seq_ptr),Y
-    STA pat_ptr
-    INY
-    LDA (seq_ptr),Y
-    STA pat_ptr+1
-    
-    LDA pat_ptr
-    ORA pat_ptr+1
-    BNE fetch_done
-    
-    LDA music_data
-    STA seq_ptr
-    LDA music_data+1
-    STA seq_ptr+1
+    LDY #0:LDA (seq_ptr),Y:STA pat_ptr
+    INY:LDA (seq_ptr),Y:STA pat_ptr+1
+    LDA pat_ptr:ORA pat_ptr+1:BNE fetch_done
+    LDA music_data:STA seq_ptr
+    LDA music_data+1:STA seq_ptr+1
     JMP fetch_new_pattern
-.fetch_done
-    RTS
+.fetch_done:RTS
 
 .kick_data
-    EQUB 16,16,16,16    ; Match Z80 exactly
-    EQUB 32,32,32,32
-    EQUB 64,64,64,64
-    EQUB 128,128,128,128
-    EQUB 0,0,0,0
-
+    EQUB 16,16,16,16,32,32,32,32,64,64,64,64,128,128,128,128,0,0,0,0
 .hat_data
     EQUB 16,3,12,6,9,20,4,8,2,14,9,17,5,8,12,4,7,16,13,22,5,3,16,3,12,6,9,20,4,8,2,14,9,17,5,8,12,4,7,16,13,22,5,3
     EQUB 12,8,1,24,6,7,4,9,18,12,8,3,11,7,5,8,3,17,9,15,22,6,5,8,11,13,4,8,12,9,2,4,7,8,12,6,7,4,19,22,1,9,6,27,4,3,11
@@ -562,30 +281,12 @@ ORG $1100
     EQUB 22,4,7,3,8,9,4,11,8,5,9,2,6,2,8,8,3,11,5,3,9,6,7,4,8
 
 .init_hw
-    LDA #$9F
-    JSR sn_w
-    LDA #$BF
-    JSR sn_w
-    LDA #$DF
-    JSR sn_w
-    LDA #$FF
-    JSR sn_w
-    LDA #$FF
-    STA VIA_DDRA
-    LDA #$0F
-    STA VIA_DDRB
-    LDA #$81
-    JSR sn_w
-    LDA #$00
-    JSR sn_w
+    LDA #$9F:JSR sn_w:LDA #$BF:JSR sn_w:LDA #$DF:JSR sn_w:LDA #$FF:JSR sn_w
+    LDA #$FF:STA VIA_DDRA:LDA #$0F:STA VIA_DDRB
+    LDA #$81:JSR sn_w:LDA #$00:JSR sn_w
     RTS
 .sn_w
-    STA VIA_ORA
-    LDX #0
-    STX VIA_ORB
-    LDX #8
-    STX VIA_ORB
-    RTS
+    STA VIA_ORA:LDX #0:STX VIA_ORB:LDX #8:STX VIA_ORB:RTS
 
 ORG $2000
     INCLUDE "tracks\Squeeker Plus\1-bit_high_and_rising.asm"
