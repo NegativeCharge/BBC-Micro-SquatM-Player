@@ -9,18 +9,18 @@
 .pattern1
 	equb $40
 .pattern2
-	equw $600,$0,$193,env2,$cb,env4,$0,env1,$4,$0,env1
+	equw $600,$0,$1be,env2,$e1,env4,$0,env1,$4,$0,env1
 	equw $380,$0,$0,env2,$0,env4,$40
-	equw $680,$0,$193,env3,$cb,env5,$c0
+	equw $680,$0,$1be,env3,$e1,env5,$c0
 	equw $380,$0,$0,env3,$0,env5,$40
 	equw $685,$0,$44
-	equw $385,$0,$1,$1973,env10
+	equw $385,$0,$1,$1c21,env10
 	equw $685,$0,$80,$0,env10
 	equw $385,$0,$c0
-	equw $685,$0,$5,$1973,env10
+	equw $685,$0,$5,$1c21,env10
 	equw $385,$0,$0,$0,env10
 	equw $685,$0,$c0
-	equw $385,$0,$1,$1973,env10
+	equw $385,$0,$1,$1c21,env10
 	equw $685,$0,$4,$0,env10
 	equw $385,$0,$40
 	equw $685,$0,$c0
@@ -28,31 +28,31 @@
 	equw $685,$0,$44
 	equw $385,$0,$40
 	equw $685,$0,$c0
-	equw $385,$0,$1,$1973,env10
+	equw $385,$0,$1,$1c21,env10
 	equw $685,$0,$4,$0,env10
 	equw $385,$0,$40
-	equw $685,$0,$81,$1973,env10
+	equw $685,$0,$81,$1c21,env10
 	equw $385,$0,$80,$0,env10
 	equw $685,$0,$44
-	equw $385,$0,$1,$1e44,env10
+	equw $385,$0,$1,$2173,env10
 	equw $685,$0,$80,$0,env10
 	equw $385,$0,$40
-	equw $685,$0,$5,$1973,env10
-	equw $380,$0,$32a,env7,$197,env1,$0,$0,env10
+	equw $685,$0,$5,$1c21,env10
+	equw $380,$0,$380,env7,$1c2,env1,$0,$0,env10
 	equw $680,$0,$0,env7,$0,env1,$c0
-	equw $380,$0,$32a,env8,$197,env4,$c0
-	equw $680,$0,$193,env4,$cb,env4,$44
+	equw $380,$0,$380,env8,$1c2,env4,$c0
+	equw $680,$0,$1be,env4,$e1,env4,$44
 	equw $380,$0,$0,env4,$0,env4,$40
-	equw $680,$0,$193,env2,$cb,env1,$c0
+	equw $680,$0,$1be,env2,$e1,env1,$c0
 	equw $380,$0,$0,env2,$0,env1,$40
 	equw $685,$0,$44
-	equw $385,$0,$1,$1973,env10
+	equw $385,$0,$1,$1c21,env10
 	equw $685,$0,$80,$0,env10
 	equw $385,$0,$c0
-	equw $685,$0,$5,$1973,env10
+	equw $685,$0,$5,$1c21,env10
 	equw $385,$0,$0,$0,env10
 	equw $685,$0,$c0
-	equw $385,$0,$1,$1973,env10
+	equw $385,$0,$1,$1c21,env10
 	equw $685,$0,$4,$0,env10
 	equw $385,$0,$40
 	equw $685,$0,$c0
@@ -60,31 +60,31 @@
 	equw $685,$0,$44
 	equw $385,$0,$40
 	equw $685,$0,$c0
-	equw $385,$0,$1,$1973,env10
+	equw $385,$0,$1,$1c21,env10
 	equw $685,$0,$4,$0,env10
 	equw $385,$0,$40
-	equw $685,$0,$81,$1973,env10
+	equw $685,$0,$81,$1c21,env10
 	equw $385,$0,$80,$0,env10
 	equw $685,$0,$44
-	equw $385,$0,$1,$1e44,env10
+	equw $385,$0,$1,$2173,env10
 	equw $685,$0,$80,$0,env10
 	equw $385,$0,$40
-	equw $685,$0,$5,$1973,env10
-	equw $380,$0,$32a,env3,$197,env1,$0,$0,env10
+	equw $685,$0,$5,$1c21,env10
+	equw $380,$0,$380,env3,$1c2,env1,$0,$0,env10
 	equw $680,$0,$0,env3,$0,env1,$c0
-	equw $380,$0,$32a,env6,$197,env1,$c0
-	equw $680,$0,$193,env6,$cb,env4,$44
+	equw $380,$0,$380,env6,$1c2,env1,$c0
+	equw $680,$0,$1be,env6,$e1,env4,$44
 	equw $380,$0,$0,env6,$0,env4,$40
-	equw $680,$0,$193,env7,$cb,env5,$c0
+	equw $680,$0,$1be,env7,$e1,env5,$c0
 	equw $380,$0,$0,env7,$0,env5,$40
 	equw $685,$0,$44
-	equw $385,$0,$1,$1973,env10
+	equw $385,$0,$1,$1c21,env10
 	equw $685,$0,$80,$0,env10
 	equw $385,$0,$c0
-	equw $685,$0,$5,$1973,env10
+	equw $685,$0,$5,$1c21,env10
 	equw $385,$0,$0,$0,env10
 	equw $685,$0,$c0
-	equw $385,$0,$1,$1973,env10
+	equw $385,$0,$1,$1c21,env10
 	equw $685,$0,$4,$0,env10
 	equw $385,$0,$40
 	equw $685,$0,$c0
@@ -92,308 +92,308 @@
 	equw $685,$0,$44
 	equw $385,$0,$40
 	equw $685,$0,$c0
-	equw $385,$0,$1,$1973,env10
+	equw $385,$0,$1,$1c21,env10
 	equw $685,$0,$4,$0,env10
 	equw $385,$0,$40
-	equw $685,$0,$81,$1973,env10
+	equw $685,$0,$81,$1c21,env10
 	equw $385,$0,$80,$0,env10
 	equw $685,$0,$44
-	equw $385,$0,$1,$1e44,env10
+	equw $385,$0,$1,$2173,env10
 	equw $685,$0,$80,$0,env10
 	equw $385,$0,$40
-	equw $685,$0,$5,$1973,env10
-	equw $380,$0,$32a,env8,$197,env1,$0,$0,env10
+	equw $685,$0,$5,$1c21,env10
+	equw $380,$0,$380,env8,$1c2,env1,$0,$0,env10
 	equw $680,$0,$0,env8,$0,env1,$c0
-	equw $380,$0,$32a,env7,$197,env1,$c0
-	equw $680,$0,$193,env6,$cb,env4,$44
+	equw $380,$0,$380,env7,$1c2,env1,$c0
+	equw $680,$0,$1be,env6,$e1,env4,$44
 	equw $380,$0,$0,env6,$0,env4,$40
-	equw $680,$0,$193,env5,$cb,env3,$44
+	equw $680,$0,$1be,env5,$e1,env3,$44
 	equw $380,$0,$0,env5,$0,env3,$40
 	equw $685,$0,$40
-	equw $385,$0,$1,$1973,env10
+	equw $385,$0,$1,$1c21,env10
 	equw $685,$0,$80,$0,env10
 	equw $385,$0,$40
-	equw $685,$0,$1,$1973,env10
+	equw $685,$0,$1,$1c21,env10
 	equw $385,$0,$0,$0,env10
 	equw $685,$0,$c0
-	equw $385,$0,$1,$1973,env10
-	equw $601,$0,$658,env13,$65c,env13,$0,$0,env10
+	equw $385,$0,$1,$1c21,env10
+	equw $601,$0,$704,env13,$708,env13,$0,$0,env10
 	equw $385,$0,$40
 	equw $685,$0,$c0
 	equw $385,$0,$40
-	equw $601,$0,$654,env12,$658,env12,$40
+	equw $601,$0,$700,env12,$704,env12,$40
 	equw $385,$0,$40
 	equw $685,$0,$c0
-	equw $385,$0,$1,$1973,env10
+	equw $385,$0,$1,$1c21,env10
 	equw $685,$0,$0,$0,env10
 	equw $385,$0,$40
-	equw $685,$0,$81,$1973,env10
+	equw $685,$0,$81,$1c21,env10
 	equw $385,$0,$0,$0,env10
 	equw $685,$0,$40
-	equw $385,$0,$1,$1e44,env10
+	equw $385,$0,$1,$2173,env10
 	equw $685,$0,$80,$0,env10
 	equw $385,$0,$40
-	equw $685,$0,$5,$1973,env10
-	equw $380,$0,$32a,env3,$197,env4,$4,$0,env10
+	equw $685,$0,$5,$1c21,env10
+	equw $380,$0,$380,env3,$1c2,env4,$4,$0,env10
 	equw $680,$0,$0,env3,$0,env4,$44
-	equw $380,$0,$32a,env2,$197,env2,$44
-	equw $600,$0,$193,env2,$cb,env3,$0,env12,$5,$32a,env10
+	equw $380,$0,$380,env2,$1c2,env2,$44
+	equw $600,$0,$1be,env2,$e1,env3,$0,env12,$5,$380,env10
 	equw $380,$0,$0,env2,$0,env3,$40
-	equw $600,$0,$197,env4,$32e,env11,$3c8,env11,$c0
+	equw $600,$0,$1c2,env4,$384,env11,$42e,env11,$c0
 	equw $384,$0,$0,env4,$c0
-	equw $600,$0,$197,env3,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env3,$32e,env11,$3c8,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$0,$1c2,env3,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env3,$384,env11,$42e,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$32e,env11,$3c8,env11,$c0
-	equw $301,$0,$0,env11,$0,env11,$81,$1973,env10
-	equw $684,$0,$197,env2,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$32e,env11,$3c8,env11,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $601,$0,$384,env11,$42e,env11,$c0
+	equw $301,$0,$0,env11,$0,env11,$81,$1c21,env10
+	equw $684,$0,$1c2,env2,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$384,env11,$42e,env11,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $380,$0,$0,env2,$0,env3,$40
-	equw $600,$0,$197,env4,$32e,env11,$3c8,env11,$c0
-	equw $384,$0,$0,env4,$81,$1973,env10
-	equw $600,$0,$197,env3,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env3,$32e,env11,$3c8,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$384,env11,$42e,env11,$c0
+	equw $384,$0,$0,env4,$81,$1c21,env10
+	equw $600,$0,$1c2,env3,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env3,$384,env11,$42e,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$32e,env11,$3c8,env11,$80,$0,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$384,env11,$42e,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$0,$197,env2,$c7,env3,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$32e,env11,$3c8,env11,$1,$32e2,env10
-	equw $384,$0,$32a,env6,$80,$0,env10
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $600,$0,$1c2,env2,$dd,env3,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$384,env11,$42e,env11,$1,$383e,env10
+	equw $384,$0,$380,env6,$80,$0,env10
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $380,$0,$0,env2,$0,env3,$40
-	equw $600,$0,$197,env4,$32e,env11,$402,env11,$c0
+	equw $600,$0,$1c2,env4,$384,env11,$46e,env11,$c0
 	equw $384,$0,$0,env4,$c0
-	equw $600,$0,$197,env3,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env3,$32e,env11,$402,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$0,$1c2,env3,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env3,$384,env11,$46e,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$32e,env11,$402,env11,$c0
-	equw $381,$0,$0,env11,$81,$1973,env10
-	equw $604,$0,$197,env2,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$32e,env11,$402,env11,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $601,$0,$384,env11,$46e,env11,$c0
+	equw $381,$0,$0,env11,$81,$1c21,env10
+	equw $604,$0,$1c2,env2,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$384,env11,$46e,env11,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $380,$0,$0,env2,$0,env3,$40
-	equw $600,$0,$197,env4,$32e,env11,$402,env11,$c0
-	equw $384,$0,$0,env4,$81,$1973,env10
-	equw $600,$0,$197,env3,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env3,$32e,env11,$402,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$384,env11,$46e,env11,$c0
+	equw $384,$0,$0,env4,$81,$1c21,env10
+	equw $600,$0,$1c2,env3,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env3,$384,env11,$46e,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$80,$0,env10
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$32e,env11,$402,env11,$80,$0,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$384,env11,$46e,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$0,$197,env2,$32a,env5,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$322,env11,$402,env11,$1,$32e2,env10
-	equw $380,$0,$32a,env6,$c7,env11,$80,$0,env10
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $600,$0,$1c2,env2,$380,env5,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$378,env11,$46e,env11,$1,$383e,env10
+	equw $380,$0,$380,env6,$dd,env11,$80,$0,env10
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $380,$0,$0,env2,$0,env3,$40
-	equw $600,$0,$197,env4,$32e,env11,$3c8,env11,$c0
+	equw $600,$0,$1c2,env4,$384,env11,$42e,env11,$c0
 	equw $384,$0,$0,env4,$c0
-	equw $600,$0,$197,env3,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env3,$32e,env11,$3c8,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$0,$1c2,env3,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env3,$384,env11,$42e,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$32e,env11,$3c8,env11,$c0
-	equw $301,$0,$0,env11,$0,env11,$81,$1973,env10
-	equw $684,$0,$197,env2,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$32e,env11,$3c8,env11,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $601,$0,$384,env11,$42e,env11,$c0
+	equw $301,$0,$0,env11,$0,env11,$81,$1c21,env10
+	equw $684,$0,$1c2,env2,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$384,env11,$42e,env11,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $380,$0,$0,env2,$0,env3,$40
-	equw $600,$0,$197,env4,$32e,env11,$3c8,env11,$c0
-	equw $384,$0,$0,env4,$81,$1973,env10
-	equw $600,$0,$197,env3,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env3,$32e,env11,$3c8,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$384,env11,$42e,env11,$c0
+	equw $384,$0,$0,env4,$81,$1c21,env10
+	equw $600,$0,$1c2,env3,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env3,$384,env11,$42e,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$80,$0,env10
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$32e,env11,$3c8,env11,$80,$0,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$384,env11,$42e,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$0,$197,env2,$c7,env3,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$32e,env11,$3c8,env11,$1,$32e2,env10
-	equw $384,$0,$32a,env6,$80,$0,env10
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $600,$0,$1c2,env2,$dd,env3,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$384,env11,$42e,env11,$1,$383e,env10
+	equw $384,$0,$380,env6,$80,$0,env10
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $380,$0,$0,env2,$0,env3,$40
-	equw $600,$0,$197,env4,$32e,env11,$402,env11,$c0
+	equw $600,$0,$1c2,env4,$384,env11,$46e,env11,$c0
 	equw $384,$0,$0,env4,$c0
-	equw $600,$0,$197,env3,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env3,$32e,env11,$402,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$0,$1c2,env3,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env3,$384,env11,$46e,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$32e,env11,$402,env11,$c0
-	equw $381,$0,$0,env11,$81,$1973,env10
-	equw $604,$0,$197,env2,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$32e,env11,$402,env11,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $601,$0,$384,env11,$46e,env11,$c0
+	equw $381,$0,$0,env11,$81,$1c21,env10
+	equw $604,$0,$1c2,env2,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$384,env11,$46e,env11,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $380,$0,$0,env2,$0,env3,$40
-	equw $600,$0,$197,env4,$32e,env11,$402,env11,$c0
-	equw $384,$0,$0,env4,$81,$1973,env10
-	equw $600,$0,$197,env3,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env3,$32e,env11,$402,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$384,env11,$46e,env11,$c0
+	equw $384,$0,$0,env4,$81,$1c21,env10
+	equw $600,$0,$1c2,env3,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env3,$384,env11,$46e,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$80,$0,env10
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$32e,env11,$402,env11,$80,$0,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$384,env11,$46e,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$0,$197,env2,$32a,env5,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$322,env11,$402,env11,$1,$32e2,env10
-	equw $380,$0,$32a,env6,$c7,env11,$80,$0,env10
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $600,$0,$1c2,env2,$380,env5,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$378,env11,$46e,env11,$1,$383e,env10
+	equw $380,$0,$380,env6,$dd,env11,$80,$0,env10
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $380,$0,$0,env2,$0,env3,$40
-	equw $600,$0,$197,env4,$32e,env11,$3c8,env11,$c0
+	equw $600,$0,$1c2,env4,$384,env11,$42e,env11,$c0
 	equw $384,$0,$0,env4,$c0
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$32e,env11,$3c8,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$384,env11,$42e,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$32e,env11,$3c8,env11,$c0
-	equw $301,$0,$0,env11,$0,env11,$81,$1973,env10
-	equw $684,$cb00,$32e6,env4,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$32e,env11,$3c8,env11,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $601,$0,$384,env11,$42e,env11,$c0
+	equw $301,$0,$0,env11,$0,env11,$81,$1c21,env10
+	equw $684,$cb00,$3842,env4,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$384,env11,$42e,env11,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $380,$0,$0,env2,$0,env3,$40
-	equw $600,$0,$197,env4,$32e,env11,$3c8,env11,$c0
-	equw $384,$0,$0,env4,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$32e,env11,$3c8,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$384,env11,$42e,env11,$c0
+	equw $384,$0,$0,env4,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$384,env11,$42e,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$80,$0,env10
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$32e,env11,$3c8,env11,$80,$0,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$384,env11,$42e,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$cb00,$32e6,env4,$c7,env3,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$32e,env11,$3c8,env11,$1,$32e2,env10
-	equw $384,$0,$32a,env6,$80,$0,env10
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $600,$cb00,$3842,env4,$dd,env3,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$384,env11,$42e,env11,$1,$383e,env10
+	equw $384,$0,$380,env6,$80,$0,env10
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $380,$0,$0,env2,$0,env3,$40
-	equw $600,$0,$197,env4,$32e,env11,$402,env11,$c0
+	equw $600,$0,$1c2,env4,$384,env11,$46e,env11,$c0
 	equw $384,$0,$0,env4,$c0
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$32e,env11,$402,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$384,env11,$46e,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$32e,env11,$402,env11,$c0
-	equw $381,$0,$0,env11,$81,$1973,env10
-	equw $604,$cb00,$32e6,env4,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$32e,env11,$402,env11,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $601,$0,$384,env11,$46e,env11,$c0
+	equw $381,$0,$0,env11,$81,$1c21,env10
+	equw $604,$cb00,$3842,env4,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$384,env11,$46e,env11,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $380,$0,$0,env2,$0,env3,$40
-	equw $600,$0,$197,env4,$32e,env11,$402,env11,$c0
-	equw $384,$0,$0,env4,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$32e,env11,$402,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$384,env11,$46e,env11,$c0
+	equw $384,$0,$0,env4,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$384,env11,$46e,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$80,$0,env10
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$32e,env11,$402,env11,$80,$0,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$384,env11,$46e,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$cb00,$32e6,env4,$32a,env5,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$322,env11,$402,env11,$1,$32e2,env10
-	equw $380,$0,$32a,env6,$c7,env11,$c0
-	equw $600,$0,$cb,env2,$65c,env13,$658,env13,$5,$32a,env10
+	equw $600,$cb00,$3842,env4,$380,env5,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$378,env11,$46e,env11,$1,$383e,env10
+	equw $380,$0,$380,env6,$dd,env11,$c0
+	equw $600,$0,$e1,env2,$708,env13,$704,env13,$5,$380,env10
 	equw $385,$0,$40
 	equw $685,$0,$40
 	equw $385,$0,$40
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env13,$5,$32a,env10
-	equw $300,$0,$0,env4,$32e,env11,$3c8,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env13,$5,$380,env10
+	equw $300,$0,$0,env4,$384,env11,$42e,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$32e,env11,$3c8,env11,$c0
-	equw $301,$0,$0,env11,$0,env11,$81,$1973,env10
-	equw $684,$cb00,$32e6,env4,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$32e,env11,$3c8,env11,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $601,$0,$384,env11,$42e,env11,$c0
+	equw $301,$0,$0,env11,$0,env11,$81,$1c21,env10
+	equw $684,$cb00,$3842,env4,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$384,env11,$42e,env11,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $380,$0,$0,env2,$0,env3,$40
-	equw $600,$0,$197,env4,$32e,env11,$3c8,env11,$c0
-	equw $384,$0,$0,env4,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$32e,env11,$3c8,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$384,env11,$42e,env11,$c0
+	equw $384,$0,$0,env4,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$384,env11,$42e,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$32e,env11,$3c8,env11,$80,$0,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$384,env11,$42e,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$cb00,$32e6,env4,$65c,env13,$658,env13,$5,$32a,env10
+	equw $600,$cb00,$3842,env4,$708,env13,$704,env13,$5,$380,env10
 	equw $384,$0,$0,env4,$40
 	equw $685,$0,$40
 	equw $385,$0,$40
-	equw $600,$0,$cb,env1,$18f,env1,$32a,env1,$5,$32a,env10
+	equw $600,$0,$e1,env1,$1ba,env1,$380,env1,$5,$380,env10
 	equw $385,$0,$40
-	equw $600,$0,$197,env1,$32e,env1,$65c,env1,$40
-	equw $300,$0,$32e,env1,$65c,env1,$cb9,env1,$40
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env1,$5,$32a,env10
-	equw $300,$0,$0,env4,$32e,env11,$402,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$0,$1c2,env1,$384,env1,$708,env1,$40
+	equw $300,$0,$384,env1,$708,env1,$e10,env1,$40
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env1,$5,$380,env10
+	equw $300,$0,$0,env4,$384,env11,$46e,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$32e,env11,$402,env11,$c0
-	equw $381,$0,$0,env11,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb9,env12,$197,env1,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $684,$0,$197,env7,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env1,$5,$32a,env10
+	equw $601,$0,$384,env11,$46e,env11,$c0
+	equw $381,$0,$0,env11,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e10,env12,$1c2,env1,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $684,$0,$1c2,env7,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env1,$5,$380,env10
 	equw $385,$0,$40
-	equw $600,$0,$197,env4,$32e,env11,$402,env11,$c0
-	equw $380,$0,$32e,env4,$cb9,env11,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$32e,env11,$402,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$384,env11,$46e,env11,$c0
+	equw $380,$0,$384,env4,$e10,env11,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$384,env11,$46e,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$c0
-	equw $680,$cb00,$32e6,env4,$cb,env3,$5,$32a,env10
-	equw $300,$0,$0,env4,$32e,env11,$402,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $680,$cb00,$3842,env4,$e1,env3,$5,$380,env10
+	equw $300,$0,$0,env4,$384,env11,$46e,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $300,$0,$0,env3,$0,env11,$0,env11,$c0
-	equw $680,$cb00,$32e6,env4,$cb,env3,$5,$32a,env10
+	equw $680,$cb00,$3842,env4,$e1,env3,$5,$380,env10
 	equw $380,$0,$0,env4,$0,env11,$c0
-	equw $680,$cb00,$32e6,env4,$cb,env3,$5,$32a,env10
-	equw $381,$cb00,$0,env11,$5,$32a,env10
-	equw $600,$0,$0,env4,$cb,env1,$193,env1,$5,$32a,env10
+	equw $680,$cb00,$3842,env4,$e1,env3,$5,$380,env10
+	equw $381,$cb00,$0,env11,$5,$380,env10
+	equw $600,$0,$0,env4,$e1,env1,$1be,env1,$5,$380,env10
 	equw $385,$0,$40
 	equw $685,$0,$c0
 	equw $385,$0,$40
@@ -421,10 +421,10 @@
 	equw $385,$0,$40
 	equw $685,$0,$c0
 	equw $385,$0,$40
-	equw $601,$0,$0,env1,$1e0,env1,$0,$f2,env1
+	equw $601,$0,$0,env1,$213,env1,$0,$10b,env1
 	equw $385,$0,$40
 	equw $685,$0,$c0
-	equw $305,$0,$1fd,env1,$0,$100,env1
+	equw $305,$0,$233,env1,$0,$11b,env1
 	equw $685,$0,$40
 	equw $385,$0,$40
 	equw $685,$0,$c0
@@ -457,7 +457,7 @@
 	equw $385,$0,$40
 	equw $685,$0,$c0
 	equw $385,$0,$40
-	equw $605,$0,$193,env1,$0,$cb,env1
+	equw $605,$0,$1be,env1,$0,$e1,env1
 	equw $385,$0,$40
 	equw $685,$0,$c0
 	equw $385,$0,$40
@@ -485,10 +485,10 @@
 	equw $385,$0,$40
 	equw $685,$0,$c0
 	equw $385,$0,$40
-	equw $605,$0,$1e0,env1,$0,$f2,env1
+	equw $605,$0,$213,env1,$0,$10b,env1
 	equw $385,$0,$40
 	equw $685,$0,$c0
-	equw $305,$0,$1fd,env1,$0,$100,env1
+	equw $305,$0,$233,env1,$0,$11b,env1
 	equw $685,$0,$40
 	equw $385,$0,$40
 	equw $685,$0,$c0
@@ -513,772 +513,772 @@
 	equw $385,$0,$40
 	equw $685,$0,$c0
 	equw $385,$0,$40
-	equw $605,$0,$12d,env1,$0,$262,env1
+	equw $605,$0,$14d,env1,$0,$2a2,env1
 	equw $385,$0,$40
 	equw $685,$0,$c0
 	equw $385,$0,$40
-	equw $605,$0,$fc,env1,$0,$201,env1
+	equw $605,$0,$117,env1,$0,$237,env1
 	equw $385,$0,$40
 	equw $685,$0,$c0
 	equw $385,$0,$40
-	equw $600,$0,$cb9,env12,$cb5,env12,$193,env1,$0,$cb,env1
+	equw $600,$0,$e10,env12,$e0c,env12,$1be,env1,$0,$e1,env1
 	equw $385,$0,$40
 	equw $685,$0,$c0
 	equw $385,$0,$40
-	equw $680,$0,$cb5,env11,$0,env12,$40
-	equw $384,$0,$e44,env11,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$cb5,env11,$40
-	equw $685,$0,$40
-	equw $384,$0,$0,env11,$40
-	equw $684,$0,$cb5,env11,$c0
-	equw $384,$0,$e44,env11,$40
-	equw $684,$0,$f1e,env11,$40
-	equw $384,$0,$cb5,env11,$40
-	equw $685,$0,$c0
-	equw $384,$0,$0,env11,$40
-	equw $684,$0,$cb5,env11,$40
-	equw $384,$0,$e44,env11,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$cb5,env11,$40
+	equw $680,$0,$e0c,env11,$0,env12,$40
+	equw $384,$0,$fc5,env11,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$e0c,env11,$40
 	equw $685,$0,$40
 	equw $384,$0,$0,env11,$40
-	equw $684,$0,$cb5,env11,$c0
-	equw $384,$0,$e44,env11,$40
-	equw $684,$0,$f1e,env11,$40
-	equw $384,$0,$cb5,env11,$40
+	equw $684,$0,$e0c,env11,$c0
+	equw $384,$0,$fc5,env11,$40
+	equw $684,$0,$10b5,env11,$40
+	equw $384,$0,$e0c,env11,$40
 	equw $685,$0,$c0
 	equw $384,$0,$0,env11,$40
-	equw $604,$0,$cb5,env11,$1e0,env1,$0,$f2,env1
-	equw $384,$0,$e44,env11,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $304,$0,$cb5,env11,$1fd,env1,$0,$100,env1
-	equw $680,$0,$cb9,env13,$cad,env13,$40
+	equw $684,$0,$e0c,env11,$40
+	equw $384,$0,$fc5,env11,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$e0c,env11,$40
+	equw $685,$0,$40
+	equw $384,$0,$0,env11,$40
+	equw $684,$0,$e0c,env11,$c0
+	equw $384,$0,$fc5,env11,$40
+	equw $684,$0,$10b5,env11,$40
+	equw $384,$0,$e0c,env11,$40
+	equw $685,$0,$c0
+	equw $384,$0,$0,env11,$40
+	equw $604,$0,$e0c,env11,$213,env1,$0,$10b,env1
+	equw $384,$0,$fc5,env11,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $304,$0,$e0c,env11,$233,env1,$0,$11b,env1
+	equw $680,$0,$e10,env13,$e04,env13,$40
 	equw $385,$0,$40
 	equw $685,$0,$c0
 	equw $385,$0,$40
-	equw $684,$0,$cb5,env11,$40
-	equw $384,$0,$1004,env11,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$cb5,env11,$40
+	equw $684,$0,$e0c,env11,$40
+	equw $384,$0,$11b4,env11,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$e0c,env11,$40
 	equw $685,$0,$40
 	equw $384,$0,$0,env11,$40
-	equw $684,$0,$cb5,env11,$c0
-	equw $384,$0,$1004,env11,$40
-	equw $684,$0,$f1e,env11,$40
-	equw $384,$0,$cb5,env11,$40
+	equw $684,$0,$e0c,env11,$c0
+	equw $384,$0,$11b4,env11,$40
+	equw $684,$0,$10b5,env11,$40
+	equw $384,$0,$e0c,env11,$40
 	equw $685,$0,$c0
 	equw $384,$0,$0,env11,$40
-	equw $684,$0,$cb5,env11,$40
-	equw $384,$0,$1004,env11,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$cb5,env11,$40
+	equw $684,$0,$e0c,env11,$40
+	equw $384,$0,$11b4,env11,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$e0c,env11,$40
 	equw $685,$0,$40
 	equw $384,$0,$0,env11,$40
-	equw $684,$0,$cb5,env11,$c0
-	equw $384,$0,$1004,env11,$40
-	equw $684,$0,$f1e,env11,$40
-	equw $384,$0,$cb5,env11,$40
-	equw $604,$0,$32e,env4,$ee,env1,$80,$1e4,env1
-	equw $384,$0,$65c,env4,$40
-	equw $684,$0,$cb5,env11,$40
-	equw $384,$0,$1004,env11,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$196f,env11,$40
-	equw $600,$0,$cb9,env12,$658,env12,$193,env1,$0,$cb,env1
+	equw $684,$0,$e0c,env11,$c0
+	equw $384,$0,$11b4,env11,$40
+	equw $684,$0,$10b5,env11,$40
+	equw $384,$0,$e0c,env11,$40
+	equw $604,$0,$384,env4,$107,env1,$80,$217,env1
+	equw $384,$0,$708,env4,$40
+	equw $684,$0,$e0c,env11,$40
+	equw $384,$0,$11b4,env11,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$1c1d,env11,$40
+	equw $600,$0,$e10,env12,$704,env12,$1be,env1,$0,$e1,env1
 	equw $385,$0,$40
 	equw $685,$0,$c0
 	equw $385,$0,$40
-	equw $684,$0,$cb5,env11,$40
-	equw $384,$0,$e44,env11,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$cb5,env11,$40
+	equw $684,$0,$e0c,env11,$40
+	equw $384,$0,$fc5,env11,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$e0c,env11,$40
 	equw $685,$0,$40
 	equw $384,$0,$0,env11,$40
-	equw $684,$0,$cb5,env11,$c0
-	equw $384,$0,$e44,env11,$40
-	equw $684,$0,$f1e,env11,$40
-	equw $384,$0,$cb5,env11,$40
+	equw $684,$0,$e0c,env11,$c0
+	equw $384,$0,$fc5,env11,$40
+	equw $684,$0,$10b5,env11,$40
+	equw $384,$0,$e0c,env11,$40
 	equw $685,$0,$c0
 	equw $384,$0,$0,env11,$40
-	equw $684,$0,$cb5,env11,$40
-	equw $384,$0,$e44,env11,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$cb5,env11,$40
+	equw $684,$0,$e0c,env11,$40
+	equw $384,$0,$fc5,env11,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$e0c,env11,$40
 	equw $685,$0,$40
 	equw $384,$0,$0,env11,$40
-	equw $684,$0,$cb5,env11,$c0
-	equw $384,$0,$e44,env11,$40
-	equw $684,$0,$f1e,env11,$40
-	equw $384,$0,$cb5,env11,$40
-	equw $684,$0,$32e,env2,$c0
-	equw $384,$0,$65c,env2,$40
-	equw $604,$0,$cb5,env11,$1e0,env1,$0,$f2,env1
-	equw $384,$0,$e44,env11,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $304,$0,$cb5,env11,$1fd,env1,$0,$100,env1
-	equw $680,$0,$cb9,env13,$654,env13,$40
+	equw $684,$0,$e0c,env11,$c0
+	equw $384,$0,$fc5,env11,$40
+	equw $684,$0,$10b5,env11,$40
+	equw $384,$0,$e0c,env11,$40
+	equw $684,$0,$384,env2,$c0
+	equw $384,$0,$708,env2,$40
+	equw $604,$0,$e0c,env11,$213,env1,$0,$10b,env1
+	equw $384,$0,$fc5,env11,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $304,$0,$e0c,env11,$233,env1,$0,$11b,env1
+	equw $680,$0,$e10,env13,$700,env13,$40
 	equw $385,$0,$40
 	equw $685,$0,$c0
 	equw $385,$0,$40
-	equw $684,$0,$cb5,env11,$40
-	equw $384,$0,$1004,env11,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$cb5,env11,$40
+	equw $684,$0,$e0c,env11,$40
+	equw $384,$0,$11b4,env11,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$e0c,env11,$40
 	equw $685,$0,$40
 	equw $384,$0,$0,env11,$40
-	equw $684,$0,$cb5,env11,$c0
-	equw $384,$0,$1004,env11,$40
-	equw $684,$0,$f1e,env11,$40
-	equw $384,$0,$cb5,env11,$40
+	equw $684,$0,$e0c,env11,$c0
+	equw $384,$0,$11b4,env11,$40
+	equw $684,$0,$10b5,env11,$40
+	equw $384,$0,$e0c,env11,$40
 	equw $685,$0,$c0
 	equw $384,$0,$0,env11,$40
-	equw $604,$0,$cb5,env11,$12d,env1,$0,$262,env1
-	equw $384,$0,$1004,env11,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$cb5,env11,$40
+	equw $604,$0,$e0c,env11,$14d,env1,$0,$2a2,env1
+	equw $384,$0,$11b4,env11,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$e0c,env11,$40
 	equw $685,$0,$40
 	equw $384,$0,$0,env11,$40
-	equw $684,$0,$cb5,env11,$c0
-	equw $384,$0,$1004,env11,$40
-	equw $604,$0,$f1e,env11,$fc,env1,$0,$201,env1
-	equw $384,$0,$cb5,env11,$40
+	equw $684,$0,$e0c,env11,$c0
+	equw $384,$0,$11b4,env11,$40
+	equw $604,$0,$10b5,env11,$117,env1,$0,$237,env1
+	equw $384,$0,$e0c,env11,$40
 	equw $685,$0,$c0
 	equw $384,$0,$0,env11,$40
-	equw $604,$0,$cb5,env11,$ee,env1,$0,$1e4,env1
-	equw $384,$0,$1004,env11,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$196f,env11,$40
-	equw $600,$cb,$cb9,env12,$32e6,env4,$193,env1,$4,$cb,env1
+	equw $604,$0,$e0c,env11,$107,env1,$0,$217,env1
+	equw $384,$0,$11b4,env11,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$1c1d,env11,$40
+	equw $600,$cb,$e10,env12,$3842,env4,$1be,env1,$4,$e1,env1
 	equw $381,$0,$0,env4,$40
-	equw $681,$cb,$32e6,env4,$44
+	equw $681,$cb,$3842,env4,$44
 	equw $381,$0,$0,env4,$40
-	equw $680,$cb,$cb5,env11,$32e6,env4,$44
-	equw $380,$0,$e44,env11,$0,env4,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$cb5,env11,$40
-	equw $681,$cb,$32e6,env4,$44
+	equw $680,$cb,$e0c,env11,$3842,env4,$44
+	equw $380,$0,$fc5,env11,$0,env4,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$e0c,env11,$40
+	equw $681,$cb,$3842,env4,$44
 	equw $380,$0,$0,env11,$0,env4,$40
-	equw $684,$0,$cb5,env11,$c0
-	equw $380,$cb,$e44,env11,$32e6,env4,$44
-	equw $680,$0,$f1e,env11,$0,env4,$40
-	equw $380,$cb,$196f,env11,$32e6,env4,$40
-	equw $680,$0,$32e,env11,$0,env4,$44
-	equw $384,$0,$65c,env11,$40
-	equw $680,$cb,$cb5,env11,$32e6,env4,$44
-	equw $380,$0,$e44,env11,$0,env4,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$cb5,env11,$40
-	equw $681,$cb,$32e6,env4,$44
+	equw $684,$0,$e0c,env11,$c0
+	equw $380,$cb,$fc5,env11,$3842,env4,$44
+	equw $680,$0,$10b5,env11,$0,env4,$40
+	equw $380,$cb,$1c1d,env11,$3842,env4,$40
+	equw $680,$0,$384,env11,$0,env4,$44
+	equw $384,$0,$708,env11,$40
+	equw $680,$cb,$e0c,env11,$3842,env4,$44
+	equw $380,$0,$fc5,env11,$0,env4,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$e0c,env11,$40
+	equw $681,$cb,$3842,env4,$44
 	equw $380,$0,$0,env11,$0,env4,$40
-	equw $684,$0,$cb5,env11,$c0
-	equw $384,$0,$e44,env11,$40
-	equw $680,$cb,$f1e,env11,$32e6,env4,$44
-	equw $380,$0,$196f,env11,$0,env4,$40
-	equw $684,$0,$65c,env11,$c0
-	equw $380,$cb,$32e,env11,$32e6,env4,$44
-	equw $600,$0,$cb5,env11,$0,env4,$1e0,env1,$0,$f2,env1
-	equw $380,$cb,$e44,env11,$32e6,env4,$44
-	equw $680,$0,$f1e,env11,$0,env4,$c0
-	equw $300,$cb,$cb5,env11,$32e6,env4,$1fd,env1,$4,$100,env1
-	equw $684,$cb,$cb9,env13,$44
+	equw $684,$0,$e0c,env11,$c0
+	equw $384,$0,$fc5,env11,$40
+	equw $680,$cb,$10b5,env11,$3842,env4,$44
+	equw $380,$0,$1c1d,env11,$0,env4,$40
+	equw $684,$0,$708,env11,$c0
+	equw $380,$cb,$384,env11,$3842,env4,$44
+	equw $600,$0,$e0c,env11,$0,env4,$213,env1,$0,$10b,env1
+	equw $380,$cb,$fc5,env11,$3842,env4,$44
+	equw $680,$0,$10b5,env11,$0,env4,$c0
+	equw $300,$cb,$e0c,env11,$3842,env4,$233,env1,$4,$11b,env1
+	equw $684,$cb,$e10,env13,$44
 	equw $381,$0,$0,env4,$40
-	equw $681,$cb,$32e6,env4,$44
+	equw $681,$cb,$3842,env4,$44
 	equw $381,$0,$0,env4,$40
-	equw $680,$cb,$cb5,env11,$32e6,env4,$44
-	equw $380,$0,$1004,env11,$0,env4,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$cb5,env11,$40
-	equw $681,$cb,$32e6,env4,$44
+	equw $680,$cb,$e0c,env11,$3842,env4,$44
+	equw $380,$0,$11b4,env11,$0,env4,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$e0c,env11,$40
+	equw $681,$cb,$3842,env4,$44
 	equw $380,$0,$0,env11,$0,env4,$40
-	equw $684,$0,$cb5,env11,$c0
-	equw $380,$cb,$1004,env11,$32e6,env4,$44
-	equw $680,$0,$f1e,env11,$0,env4,$40
-	equw $380,$cb,$196f,env11,$32e6,env4,$40
-	equw $680,$0,$32e,env11,$0,env4,$44
-	equw $384,$0,$65c,env11,$40
-	equw $680,$cb,$cb5,env11,$32e6,env4,$44
-	equw $380,$0,$1004,env11,$0,env4,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$cb5,env11,$40
-	equw $681,$cb,$32e6,env4,$44
+	equw $684,$0,$e0c,env11,$c0
+	equw $380,$cb,$11b4,env11,$3842,env4,$44
+	equw $680,$0,$10b5,env11,$0,env4,$40
+	equw $380,$cb,$1c1d,env11,$3842,env4,$40
+	equw $680,$0,$384,env11,$0,env4,$44
+	equw $384,$0,$708,env11,$40
+	equw $680,$cb,$e0c,env11,$3842,env4,$44
+	equw $380,$0,$11b4,env11,$0,env4,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$e0c,env11,$40
+	equw $681,$cb,$3842,env4,$44
 	equw $380,$0,$0,env11,$0,env4,$40
-	equw $684,$0,$cb5,env11,$c0
-	equw $384,$0,$1004,env11,$40
-	equw $600,$cb,$f1e,env11,$32e6,env4,$ee,env1,$4,$1e4,env1
-	equw $380,$0,$cb5,env11,$0,env4,$40
-	equw $604,$0,$65c,env11,$1e0,env1,$80,$3c8,env1
-	equw $380,$cb,$32e,env11,$32e6,env4,$44
-	equw $600,$0,$cb5,env11,$0,env4,$d3,env1,$0,$1af,env1
-	equw $380,$cb,$1004,env11,$32e6,env4,$44
-	equw $600,$0,$f1e,env11,$0,env4,$1ab,env1,$80,$35e,env1
-	equw $380,$cb,$cb5,env11,$32e6,env4,$44
-	equw $604,$cb,$cb9,env12,$193,env1,$4,$cb,env1
+	equw $684,$0,$e0c,env11,$c0
+	equw $384,$0,$11b4,env11,$40
+	equw $600,$cb,$10b5,env11,$3842,env4,$107,env1,$4,$217,env1
+	equw $380,$0,$e0c,env11,$0,env4,$40
+	equw $604,$0,$708,env11,$213,env1,$80,$42e,env1
+	equw $380,$cb,$384,env11,$3842,env4,$44
+	equw $600,$0,$e0c,env11,$0,env4,$ea,env1,$0,$1dc,env1
+	equw $380,$cb,$11b4,env11,$3842,env4,$44
+	equw $600,$0,$10b5,env11,$0,env4,$1d8,env1,$80,$3b9,env1
+	equw $380,$cb,$e0c,env11,$3842,env4,$44
+	equw $604,$cb,$e10,env12,$1be,env1,$4,$e1,env1
 	equw $381,$0,$0,env4,$40
-	equw $681,$cb,$32e6,env4,$44
+	equw $681,$cb,$3842,env4,$44
 	equw $381,$0,$0,env4,$40
-	equw $680,$cb,$cb5,env11,$32e6,env4,$44
-	equw $380,$0,$e44,env11,$0,env4,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$cb5,env11,$40
-	equw $681,$cb,$32e6,env4,$44
+	equw $680,$cb,$e0c,env11,$3842,env4,$44
+	equw $380,$0,$fc5,env11,$0,env4,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$e0c,env11,$40
+	equw $681,$cb,$3842,env4,$44
 	equw $380,$0,$0,env11,$0,env4,$40
-	equw $684,$0,$cb5,env11,$c0
-	equw $380,$cb,$e44,env11,$32e6,env4,$44
-	equw $680,$0,$f1e,env11,$0,env4,$40
-	equw $380,$cb,$196f,env11,$32e6,env4,$40
-	equw $680,$0,$32e,env11,$0,env4,$44
-	equw $384,$0,$65c,env11,$40
-	equw $680,$cb,$cb5,env11,$32e6,env4,$44
-	equw $380,$0,$e44,env11,$0,env4,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$cb5,env11,$40
-	equw $681,$cb,$32e6,env4,$44
+	equw $684,$0,$e0c,env11,$c0
+	equw $380,$cb,$fc5,env11,$3842,env4,$44
+	equw $680,$0,$10b5,env11,$0,env4,$40
+	equw $380,$cb,$1c1d,env11,$3842,env4,$40
+	equw $680,$0,$384,env11,$0,env4,$44
+	equw $384,$0,$708,env11,$40
+	equw $680,$cb,$e0c,env11,$3842,env4,$44
+	equw $380,$0,$fc5,env11,$0,env4,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$e0c,env11,$40
+	equw $681,$cb,$3842,env4,$44
 	equw $380,$0,$0,env11,$0,env4,$40
-	equw $684,$0,$cb5,env11,$c0
-	equw $384,$0,$e44,env11,$40
-	equw $600,$cb,$f1e,env11,$32e6,env4,$32a,env1,$4,$197,env1
-	equw $380,$0,$cb5,env11,$0,env4,$40
-	equw $604,$0,$65c,env11,$193,env1,$80,$cb,env1
-	equw $380,$cb,$32e,env11,$32e6,env4,$44
-	equw $600,$0,$cb5,env11,$0,env4,$1e0,env1,$0,$f2,env1
-	equw $380,$cb,$e44,env11,$32e6,env4,$44
-	equw $600,$0,$f1e,env11,$0,env4,$3c8,env1,$80,$1e4,env1
-	equw $300,$cb,$cb5,env11,$32e6,env4,$1fd,env1,$4,$100,env1
-	equw $684,$cb,$cb9,env13,$44
+	equw $684,$0,$e0c,env11,$c0
+	equw $384,$0,$fc5,env11,$40
+	equw $600,$cb,$10b5,env11,$3842,env4,$380,env1,$4,$1c2,env1
+	equw $380,$0,$e0c,env11,$0,env4,$40
+	equw $604,$0,$708,env11,$1be,env1,$80,$e1,env1
+	equw $380,$cb,$384,env11,$3842,env4,$44
+	equw $600,$0,$e0c,env11,$0,env4,$213,env1,$0,$10b,env1
+	equw $380,$cb,$fc5,env11,$3842,env4,$44
+	equw $600,$0,$10b5,env11,$0,env4,$42e,env1,$80,$217,env1
+	equw $300,$cb,$e0c,env11,$3842,env4,$233,env1,$4,$11b,env1
+	equw $684,$cb,$e10,env13,$44
 	equw $381,$0,$0,env4,$40
-	equw $681,$cb,$32e6,env4,$44
+	equw $681,$cb,$3842,env4,$44
 	equw $381,$0,$0,env4,$40
-	equw $680,$cb,$cb5,env11,$32e6,env4,$44
-	equw $380,$0,$1004,env11,$0,env4,$40
-	equw $684,$0,$f1e,env11,$c0
-	equw $384,$0,$cb5,env11,$40
-	equw $681,$cb,$32e6,env4,$44
+	equw $680,$cb,$e0c,env11,$3842,env4,$44
+	equw $380,$0,$11b4,env11,$0,env4,$40
+	equw $684,$0,$10b5,env11,$c0
+	equw $384,$0,$e0c,env11,$40
+	equw $681,$cb,$3842,env4,$44
 	equw $380,$0,$0,env11,$0,env4,$40
-	equw $684,$0,$cb5,env11,$c0
-	equw $380,$cb,$1004,env11,$32e6,env4,$44
-	equw $680,$0,$f1e,env11,$0,env4,$40
-	equw $380,$cb,$196f,env11,$32e6,env4,$40
-	equw $680,$0,$cb9,env11,$0,env4,$44
-	equw $384,$0,$65c,env11,$40
-	equw $680,$cb,$cb5,env11,$32e6,env4,$44
-	equw $380,$0,$1004,env11,$0,env4,$40
-	equw $680,$cb,$f1e,env11,$32e6,env4,$44
-	equw $380,$0,$cb5,env11,$0,env4,$40
-	equw $680,$cb,$65c,env13,$32e6,env4,$44
+	equw $684,$0,$e0c,env11,$c0
+	equw $380,$cb,$11b4,env11,$3842,env4,$44
+	equw $680,$0,$10b5,env11,$0,env4,$40
+	equw $380,$cb,$1c1d,env11,$3842,env4,$40
+	equw $680,$0,$e10,env11,$0,env4,$44
+	equw $384,$0,$708,env11,$40
+	equw $680,$cb,$e0c,env11,$3842,env4,$44
+	equw $380,$0,$11b4,env11,$0,env4,$40
+	equw $680,$cb,$10b5,env11,$3842,env4,$44
+	equw $380,$0,$e0c,env11,$0,env4,$40
+	equw $680,$cb,$708,env13,$3842,env4,$44
 	equw $381,$0,$0,env4,$40
-	equw $681,$cb,$32e6,env4,$44
+	equw $681,$cb,$3842,env4,$44
 	equw $381,$0,$0,env4,$40
-	equw $680,$cb,$32e6,env13,$32e6,env4,$44
-	equw $384,$cb,$35ed,env13,$44
-	equw $684,$cb,$3921,env13,$44
-	equw $384,$cb,$3c88,env13,$44
-	equw $684,$cb,$4021,env13,$44
-	equw $384,$cb,$43f1,env13,$44
-	equw $684,$cb,$47fc,env13,$44
-	equw $384,$cb,$4c44,env13,$44
+	equw $680,$cb,$3842,env13,$3842,env4,$44
+	equw $384,$cb,$3b9a,env13,$44
+	equw $684,$cb,$3f25,env13,$44
+	equw $384,$cb,$42e7,env13,$44
+	equw $684,$cb,$46e1,env13,$44
+	equw $384,$cb,$4b18,env13,$44
+	equw $684,$cb,$4f90,env13,$44
+	equw $384,$cb,$544b,env13,$44
 	equw $104,$0,$0,env13,$0,env1,$80,$0,env1
 	equw $181,$0,$0,env4,$40
-	equw $181,$0,$3c88,env4,$40
+	equw $181,$0,$42e7,env4,$40
 	equw $181,$0,$0,env4,$40
-	equw $181,$0,$43f1,env4,$40
+	equw $181,$0,$4b18,env4,$40
 	equw $181,$0,$0,env4,$40
-	equw $181,$0,$43f1,env4,$40
-	equw $181,$0,$0,env4,$40
-	equw $185,$0,$40
-	equw $181,$0,$3c88,env4,$40
-	equw $185,$0,$40
-	equw $181,$0,$4c44,env4,$40
-	equw $181,$cb,$32e6,env4,$40
-	equw $181,$0,$559b,env4,$40
-	equw $181,$cb,$47fc,env4,$40
-	equw $181,$0,$50cc,env4,$40
-	equw $181,$cb,$47fc,env4,$40
-	equw $181,$0,$0,env4,$40
-	equw $181,$0,$32e6,env4,$c0
+	equw $181,$0,$4b18,env4,$40
 	equw $181,$0,$0,env4,$40
 	equw $185,$0,$40
-	equw $181,$0,$32e6,env4,$40
+	equw $181,$0,$42e7,env4,$40
+	equw $185,$0,$40
+	equw $181,$0,$544b,env4,$40
+	equw $181,$cb,$3842,env4,$40
+	equw $181,$0,$5e9e,env4,$40
+	equw $181,$cb,$4f90,env4,$40
+	equw $181,$0,$594e,env4,$40
+	equw $181,$cb,$4f90,env4,$40
+	equw $181,$0,$0,env4,$40
+	equw $181,$0,$3842,env4,$c0
 	equw $181,$0,$0,env4,$40
 	equw $185,$0,$40
-	equw $181,$0,$32e6,env4,$40
+	equw $181,$0,$3842,env4,$40
 	equw $181,$0,$0,env4,$40
 	equw $185,$0,$40
-	equw $181,$0,$32e6,env4,$40
+	equw $181,$0,$3842,env4,$40
 	equw $181,$0,$0,env4,$40
 	equw $185,$0,$40
-	equw $181,$0,$32e6,env4,$40
+	equw $181,$0,$3842,env4,$40
 	equw $181,$0,$0,env4,$40
 	equw $185,$0,$40
-	equw $181,$0,$32e6,env4,$40
+	equw $181,$0,$3842,env4,$40
 	equw $181,$0,$0,env4,$40
 	equw $185,$0,$40
-	equw $181,$0,$32e6,env4,$c0
+	equw $181,$0,$3842,env4,$40
+	equw $181,$0,$0,env4,$40
+	equw $185,$0,$40
+	equw $181,$0,$3842,env4,$c0
 	equw $185,$0,$40
 	equw $181,$0,$0,env4,$40
-	equw $181,$cb,$3c88,env4,$40
+	equw $181,$cb,$42e7,env4,$40
 	equw $185,$cb,$40
 	equw $181,$0,$0,env4,$40
-	equw $181,$0,$43f1,env4,$40
+	equw $181,$0,$4b18,env4,$40
 	equw $185,$0,$40
 	equw $181,$0,$0,env4,$40
-	equw $181,$cb,$50cc,env4,$40
+	equw $181,$cb,$594e,env4,$40
 	equw $185,$cb,$40
 	equw $181,$0,$0,env4,$40
-	equw $181,$0,$559b,env4,$40
+	equw $181,$0,$5e9e,env4,$40
 	equw $185,$0,$40
 	equw $181,$0,$0,env4,$40
-	equw $181,$0,$6016,env4,$40
+	equw $181,$0,$6a33,env4,$40
 	equw $185,$0,$40
 	equw $181,$0,$0,env4,$40
-	equw $100,$cb,$87e,env1,$43f1,env4,$43b,env1,$4,$21b,env1
-	equw $100,$0,$804,env1,$4021,env4,$3fe,env1,$0,$1fd,env1
-	equw $100,$cb,$791,env1,$3c88,env4,$3c4,env1,$0,$1e0,env1
-	equw $100,$0,$724,env1,$3921,env4,$38e,env1,$0,$1c5,env1
-	equw $100,$cb,$6bd,env1,$35ed,env4,$35a,env1,$0,$1ab,env1
-	equw $100,$0,$65c,env1,$32e6,env4,$32a,env1,$0,$193,env1
-	equw $100,$cb,$601,env1,$300b,env4,$2fc,env1,$0,$17c,env1
-	equw $100,$0,$5ab,env1,$2d58,env4,$2d1,env1,$0,$166,env1
-	equw $100,$cb,$559,env1,$2acd,env4,$2a8,env1,$0,$152,env1
-	equw $100,$0,$50c,env1,$2866,env4,$282,env1,$4,$13f,env1
-	equw $100,$cb,$4c4,env1,$2622,env4,$25e,env1,$0,$12d,env1
-	equw $100,$0,$47f,env1,$23fe,env4,$23b,env1,$0,$11b,env1
-	equw $100,$cb,$43f,env1,$21f8,env4,$21b,env1,$0,$10b,env1
-	equw $100,$0,$402,env1,$2010,env4,$1fd,env1,$0,$fc,env1
-	equw $100,$cb,$3c8,env1,$1e44,env4,$1e0,env1,$0,$ee,env1
-	equw $100,$0,$392,env1,$1c90,env4,$1c5,env1,$4,$e0,env1
-	equw $100,$cb,$35e,env1,$1af6,env4,$1ab,env1,$0,$d3,env1
-	equw $100,$0,$32e,env1,$1973,env4,$193,env1,$0,$c7,env1
-	equw $600,$0,$193,env2,$cb,env3,$0,env1,$5,$32a,env10
+	equw $100,$cb,$963,env1,$4b18,env4,$4ad,env1,$4,$254,env1
+	equw $100,$0,$8dc,env1,$46e1,env4,$46a,env1,$0,$233,env1
+	equw $100,$cb,$85c,env1,$42e7,env4,$42a,env1,$0,$213,env1
+	equw $100,$0,$7e4,env1,$3f25,env4,$3ee,env1,$0,$1f5,env1
+	equw $100,$cb,$773,env1,$3b9a,env4,$3b5,env1,$0,$1d8,env1
+	equw $100,$0,$708,env1,$3842,env4,$380,env1,$0,$1be,env1
+	equw $100,$cb,$6a3,env1,$3519,env4,$34d,env1,$0,$1a4,env1
+	equw $100,$0,$643,env1,$321e,env4,$31d,env1,$0,$18c,env1
+	equw $100,$cb,$5e9,env1,$2f4f,env4,$2f0,env1,$0,$176,env1
+	equw $100,$0,$594,env1,$2ca7,env4,$2c6,env1,$4,$161,env1
+	equw $100,$cb,$544,env1,$2a25,env4,$29e,env1,$0,$14d,env1
+	equw $100,$0,$4f9,env1,$27c8,env4,$278,env1,$0,$13a,env1
+	equw $100,$cb,$4b1,env1,$258c,env4,$254,env1,$0,$128,env1
+	equw $100,$0,$46e,env1,$2370,env4,$233,env1,$0,$117,env1
+	equw $100,$cb,$42e,env1,$2173,env4,$213,env1,$0,$107,env1
+	equw $100,$0,$3f2,env1,$1f92,env4,$1f5,env1,$4,$f8,env1
+	equw $100,$cb,$3b9,env1,$1dcd,env4,$1d8,env1,$0,$ea,env1
+	equw $100,$0,$384,env1,$1c21,env4,$1be,env1,$0,$dd,env1
+	equw $600,$0,$1be,env2,$e1,env3,$0,env1,$5,$380,env10
 	equw $385,$0,$40
-	equw $600,$0,$197,env4,$65c,env11,$791,env11,$c0
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$791,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$0,$1c2,env4,$708,env11,$85c,env11,$c0
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$85c,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $301,$0,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$65c,env11,$791,env11,$c0
-	equw $301,$0,$0,env11,$0,env11,$81,$1973,env10
-	equw $684,$cb00,$32e6,env4,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$65c,env11,$791,env11,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $601,$0,$708,env11,$85c,env11,$c0
+	equw $301,$0,$0,env11,$0,env11,$81,$1c21,env10
+	equw $684,$cb00,$3842,env4,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$708,env11,$85c,env11,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $381,$0,$0,env3,$40
-	equw $600,$0,$197,env4,$65c,env11,$791,env11,$c0
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$791,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$708,env11,$85c,env11,$c0
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$85c,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $301,$0,$0,env11,$0,env11,$80,$0,env10
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$65c,env11,$791,env11,$80,$0,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$708,env11,$85c,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$cb00,$32e6,env4,$c7,env3,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$65c,env11,$791,env11,$1,$32e2,env10
-	equw $384,$0,$32a,env6,$80,$0,env10
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $600,$cb00,$3842,env4,$dd,env3,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$708,env11,$85c,env11,$1,$383e,env10
+	equw $384,$0,$380,env6,$80,$0,env10
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $385,$0,$40
-	equw $600,$0,$197,env4,$65c,env11,$804,env11,$c0
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$804,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$0,$1c2,env4,$708,env11,$8dc,env11,$c0
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$8dc,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $301,$0,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$65c,env11,$804,env11,$c0
-	equw $381,$0,$0,env11,$81,$1973,env10
-	equw $604,$cb00,$32e6,env4,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$65c,env11,$804,env11,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $601,$0,$708,env11,$8dc,env11,$c0
+	equw $381,$0,$0,env11,$81,$1c21,env10
+	equw $604,$cb00,$3842,env4,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$708,env11,$8dc,env11,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $381,$0,$0,env3,$40
-	equw $600,$0,$197,env4,$65c,env11,$804,env11,$c0
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$804,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$708,env11,$8dc,env11,$c0
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$8dc,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $301,$0,$0,env11,$0,env11,$80,$0,env10
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$65c,env11,$804,env11,$80,$0,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$708,env11,$8dc,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$cb00,$32e6,env4,$32a,env5,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$650,env11,$804,env11,$1,$32e2,env10
-	equw $380,$0,$32a,env6,$c7,env11,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $600,$cb00,$3842,env4,$380,env5,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$6fc,env11,$8dc,env11,$1,$383e,env10
+	equw $380,$0,$380,env6,$dd,env11,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $385,$0,$40
-	equw $600,$0,$197,env4,$65c,env11,$87e,env11,$c0
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$87e,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$0,$1c2,env4,$708,env11,$963,env11,$c0
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$963,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $301,$0,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$65c,env11,$87e,env11,$c0
-	equw $301,$0,$0,env11,$0,env11,$81,$1973,env10
-	equw $684,$cb00,$32e6,env4,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$65c,env11,$87e,env11,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $601,$0,$708,env11,$963,env11,$c0
+	equw $301,$0,$0,env11,$0,env11,$81,$1c21,env10
+	equw $684,$cb00,$3842,env4,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$708,env11,$963,env11,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $381,$0,$0,env3,$40
-	equw $600,$0,$197,env4,$65c,env11,$87e,env11,$c0
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$87e,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$708,env11,$963,env11,$c0
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$963,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $301,$0,$0,env11,$0,env11,$80,$0,env10
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$65c,env11,$87e,env11,$80,$0,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$708,env11,$963,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$cb00,$32e6,env4,$c7,env3,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$65c,env11,$87e,env11,$1,$32e2,env10
-	equw $384,$0,$32a,env6,$80,$0,env10
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $600,$cb00,$3842,env4,$dd,env3,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$708,env11,$963,env11,$1,$383e,env10
+	equw $384,$0,$380,env6,$80,$0,env10
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $385,$0,$40
-	equw $600,$0,$197,env4,$65c,env11,$988,env11,$c0
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$988,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$0,$1c2,env4,$708,env11,$a89,env11,$c0
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$a89,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $301,$0,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$65c,env11,$988,env11,$c0
-	equw $381,$0,$0,env11,$81,$1973,env10
-	equw $604,$cb00,$32e6,env4,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$65c,env11,$988,env11,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $601,$0,$708,env11,$a89,env11,$c0
+	equw $381,$0,$0,env11,$81,$1c21,env10
+	equw $604,$cb00,$3842,env4,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$708,env11,$a89,env11,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $381,$0,$0,env3,$40
-	equw $600,$0,$197,env4,$65c,env11,$988,env11,$c0
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$988,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$708,env11,$a89,env11,$c0
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$a89,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $301,$0,$0,env11,$0,env11,$80,$0,env10
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$65c,env11,$988,env11,$80,$0,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$708,env11,$a89,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$cb00,$32e6,env4,$32a,env5,$0,env11,$5,$32a,env10
+	equw $600,$cb00,$3842,env4,$380,env5,$0,env11,$5,$380,env10
 	equw $384,$0,$0,env4,$40
-	equw $600,$0,$197,env2,$bf,env11,$988,env11,$80,$4c0,env10
+	equw $600,$0,$1c2,env2,$d5,env11,$a89,env11,$80,$540,env10
 	equw $385,$0,$40
-	equw $601,$0,$65c,env13,$196f,env13,$5,$32a,env10
+	equw $601,$0,$708,env13,$1c1d,env13,$5,$380,env10
 	equw $385,$0,$40
 	equw $685,$0,$40
 	equw $385,$0,$40
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env13,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$791,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env13,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$85c,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $301,$0,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$65c,env11,$791,env11,$c0
-	equw $301,$0,$0,env11,$0,env11,$81,$1973,env10
-	equw $684,$cb00,$32e6,env4,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$65c,env11,$791,env11,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $601,$0,$708,env11,$85c,env11,$c0
+	equw $301,$0,$0,env11,$0,env11,$81,$1c21,env10
+	equw $684,$cb00,$3842,env4,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$708,env11,$85c,env11,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $381,$0,$0,env3,$40
-	equw $600,$0,$197,env4,$65c,env11,$791,env11,$c0
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb9,env12,$197,env1,$5,$32a,env10
-	equw $384,$0,$cb,env2,$c0
+	equw $600,$0,$1c2,env4,$708,env11,$85c,env11,$c0
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e10,env12,$1c2,env1,$5,$380,env10
+	equw $384,$0,$e1,env2,$c0
 	equw $685,$0,$40
-	equw $384,$0,$32e,env2,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$65c,env11,$791,env11,$80,$0,env10
-	equw $381,$0,$f22,env11,$c0
-	equw $600,$cb00,$32e6,env4,$193,env3,$cb,env2,$5,$32a,env10
+	equw $384,$0,$384,env2,$c0
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$708,env11,$85c,env11,$80,$0,env10
+	equw $381,$0,$10b9,env11,$c0
+	equw $600,$cb00,$3842,env4,$1be,env3,$e1,env2,$5,$380,env10
 	equw $384,$0,$0,env4,$c0
-	equw $601,$0,$65c,env3,$197,env2,$1,$32e2,env10
+	equw $601,$0,$708,env3,$1c2,env2,$1,$383e,env10
 	equw $385,$0,$80,$0,env10
-	equw $600,$0,$193,env2,$cb,env3,$0,env2,$5,$32a,env10
+	equw $600,$0,$1be,env2,$e1,env3,$0,env2,$5,$380,env10
 	equw $385,$0,$40
-	equw $600,$0,$32e,env4,$65c,env11,$804,env11,$0,$988,env10
+	equw $600,$0,$384,env4,$708,env11,$8dc,env11,$0,$a89,env10
 	equw $385,$0,$40
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$804,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$8dc,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $301,$0,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$65c,env11,$804,env11,$c0
-	equw $381,$0,$0,env11,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$18f,env1,$32a,env1,$5,$32a,env10
+	equw $601,$0,$708,env11,$8dc,env11,$c0
+	equw $381,$0,$0,env11,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$1ba,env1,$380,env1,$5,$380,env10
 	equw $385,$0,$40
-	equw $600,$0,$197,env4,$32e,env1,$65c,env1,$40
-	equw $300,$0,$32e,env4,$65c,env1,$cb9,env1,$40
-	equw $600,$0,$193,env2,$cb,env3,$0,env1,$5,$32a,env10
+	equw $600,$0,$1c2,env4,$384,env1,$708,env1,$40
+	equw $300,$0,$384,env4,$708,env1,$e10,env1,$40
+	equw $600,$0,$1be,env2,$e1,env3,$0,env1,$5,$380,env10
 	equw $381,$0,$0,env3,$40
-	equw $600,$0,$197,env4,$65c,env11,$804,env11,$c0
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$804,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$708,env11,$8dc,env11,$c0
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$8dc,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $301,$0,$0,env11,$0,env11,$80,$0,env10
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$65c,env11,$804,env11,$80,$0,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$708,env11,$8dc,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$cb00,$32e6,env4,$32a,env5,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$650,env11,$804,env11,$1,$32e2,env10
-	equw $380,$0,$32a,env6,$c7,env11,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $600,$cb00,$3842,env4,$380,env5,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$6fc,env11,$8dc,env11,$1,$383e,env10
+	equw $380,$0,$380,env6,$dd,env11,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $385,$0,$40
-	equw $600,$0,$32e,env13,$65c,env13,$87e,env13,$80,$a15,env13
+	equw $600,$0,$384,env13,$708,env13,$963,env13,$80,$b25,env13
 	equw $385,$0,$40
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env13,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$87e,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env13,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$963,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $301,$0,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$65c,env12,$87e,env12,$80,$a19,env12
+	equw $601,$0,$708,env12,$963,env12,$80,$b29,env12
 	equw $385,$0,$44
-	equw $100,$cb00,$32e2,env4,$87e,env1,$43b,env1,$5,$21b,env1
-	equw $101,$cb00,$804,env1,$3fe,env1,$0,$1fd,env1
-	equw $101,$cb00,$791,env1,$3c4,env1,$0,$1e0,env1
-	equw $101,$cb00,$724,env1,$38e,env1,$0,$1c5,env1
-	equw $101,$cb00,$6bd,env1,$35a,env1,$0,$1ab,env1
-	equw $101,$cb00,$65c,env1,$32a,env1,$0,$193,env1
-	equw $100,$0,$0,env4,$601,env1,$2fc,env1,$0,$17c,env1
-	equw $101,$0,$5ab,env1,$2d1,env1,$0,$166,env1
-	equw $101,$0,$559,env1,$2a8,env1,$0,$152,env1
-	equw $100,$cb00,$32e6,env4,$50c,env1,$282,env1,$4,$13f,env1
-	equw $101,$cb00,$4c4,env1,$25e,env1,$0,$12d,env1
-	equw $101,$cb00,$47f,env1,$23b,env1,$0,$11b,env1
-	equw $101,$cb00,$43f,env1,$21b,env1,$0,$10b,env1
-	equw $101,$cb00,$402,env1,$1fd,env1,$0,$fc,env1
-	equw $101,$cb00,$3c8,env1,$1e0,env1,$0,$ee,env1
-	equw $101,$cb00,$392,env1,$1c5,env1,$4,$e0,env1
-	equw $101,$cb00,$35e,env1,$1ab,env1,$0,$d3,env1
-	equw $101,$cb00,$32e,env1,$193,env1,$0,$c7,env1
-	equw $600,$0,$193,env2,$cb,env3,$0,env1,$5,$32a,env10
+	equw $100,$cb00,$383e,env4,$963,env1,$4ad,env1,$5,$254,env1
+	equw $101,$cb00,$8dc,env1,$46a,env1,$0,$233,env1
+	equw $101,$cb00,$85c,env1,$42a,env1,$0,$213,env1
+	equw $101,$cb00,$7e4,env1,$3ee,env1,$0,$1f5,env1
+	equw $101,$cb00,$773,env1,$3b5,env1,$0,$1d8,env1
+	equw $101,$cb00,$708,env1,$380,env1,$0,$1be,env1
+	equw $100,$0,$0,env4,$6a3,env1,$34d,env1,$0,$1a4,env1
+	equw $101,$0,$643,env1,$31d,env1,$0,$18c,env1
+	equw $101,$0,$5e9,env1,$2f0,env1,$0,$176,env1
+	equw $100,$cb00,$3842,env4,$594,env1,$2c6,env1,$4,$161,env1
+	equw $101,$cb00,$544,env1,$29e,env1,$0,$14d,env1
+	equw $101,$cb00,$4f9,env1,$278,env1,$0,$13a,env1
+	equw $101,$cb00,$4b1,env1,$254,env1,$0,$128,env1
+	equw $101,$cb00,$46e,env1,$233,env1,$0,$117,env1
+	equw $101,$cb00,$42e,env1,$213,env1,$0,$107,env1
+	equw $101,$cb00,$3f2,env1,$1f5,env1,$4,$f8,env1
+	equw $101,$cb00,$3b9,env1,$1d8,env1,$0,$ea,env1
+	equw $101,$cb00,$384,env1,$1be,env1,$0,$dd,env1
+	equw $600,$0,$1be,env2,$e1,env3,$0,env1,$5,$380,env10
 	equw $381,$0,$0,env3,$40
-	equw $600,$0,$197,env4,$65c,env11,$87e,env11,$80,$b56,env10
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$87e,env11,$0,$b56,env10
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$708,env11,$963,env11,$80,$c87,env10
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$963,env11,$0,$c87,env10
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $301,$0,$0,env11,$0,env11,$80,$0,env10
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$65c,env11,$87e,env11,$80,$b56,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$708,env11,$963,env11,$80,$c87,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$cb00,$32e6,env4,$c7,env3,$197,env11,$5,$32a,env10
+	equw $600,$cb00,$3842,env4,$dd,env3,$1c2,env11,$5,$380,env10
 	equw $385,$0,$0,$0,env10
-	equw $600,$0,$b56,env1,$87e,env1,$cb9,env1,$5,$c7,env10
+	equw $600,$0,$c87,env1,$963,env1,$e10,env1,$5,$dd,env10
 	equw $385,$0,$40
-	equw $600,$0,$cb,env1,$18f,env1,$32a,env1,$5,$32a,env10
+	equw $600,$0,$e1,env1,$1ba,env1,$380,env1,$5,$380,env10
 	equw $385,$0,$40
-	equw $600,$0,$197,env1,$32e,env1,$65c,env1,$0,$988,env10
-	equw $300,$0,$32e,env1,$65c,env1,$cb9,env1,$0,$1311,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env1,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$988,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$0,$1c2,env1,$384,env1,$708,env1,$0,$a89,env10
+	equw $300,$0,$384,env1,$708,env1,$e10,env1,$0,$1512,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env1,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$a89,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $301,$0,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$65c,env11,$988,env11,$c0
-	equw $381,$0,$0,env11,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$988,env13,$65c,env13,$5,$32a,env10
+	equw $601,$0,$708,env11,$a89,env11,$c0
+	equw $381,$0,$0,env11,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$a89,env13,$708,env13,$5,$380,env10
 	equw $384,$0,$0,env4,$40
-	equw $684,$0,$cb,env1,$0,$193,env3
+	equw $684,$0,$e1,env1,$0,$1be,env3
 	equw $385,$0,$40
-	equw $600,$0,$193,env2,$cb,env3,$0,env13,$5,$32a,env10
+	equw $600,$0,$1be,env2,$e1,env3,$0,env13,$5,$380,env10
 	equw $381,$0,$0,env3,$40
-	equw $600,$0,$197,env4,$65c,env11,$988,env11,$c0
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$988,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$708,env11,$a89,env11,$c0
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$a89,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $301,$0,$0,env11,$0,env11,$80,$0,env10
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$65c,env11,$988,env11,$80,$0,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$708,env11,$a89,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $100,$cb00,$32e2,env4,$87e,env1,$43b,env1,$5,$21b,env1
-	equw $101,$cb00,$804,env1,$3fe,env1,$0,$1fd,env1
-	equw $101,$cb00,$791,env1,$3c4,env1,$0,$1e0,env1
-	equw $101,$cb00,$724,env1,$38e,env1,$0,$1c5,env1
-	equw $101,$cb00,$6bd,env1,$35a,env1,$0,$1ab,env1
-	equw $101,$cb00,$65c,env1,$32a,env1,$0,$193,env1
-	equw $100,$0,$0,env4,$601,env1,$2fc,env1,$0,$17c,env1
-	equw $101,$0,$5ab,env1,$2d1,env1,$0,$166,env1
-	equw $101,$0,$559,env1,$2a8,env1,$0,$152,env1
-	equw $100,$cb00,$32e6,env4,$50c,env1,$282,env1,$4,$13f,env1
-	equw $101,$cb00,$4c4,env1,$25e,env1,$0,$12d,env1
-	equw $101,$cb00,$47f,env1,$23b,env1,$0,$11b,env1
-	equw $101,$cb00,$43f,env1,$21b,env1,$0,$10b,env1
-	equw $101,$cb00,$402,env1,$1fd,env1,$0,$fc,env1
-	equw $101,$cb00,$3c8,env1,$1e0,env1,$0,$ee,env1
-	equw $101,$cb00,$392,env1,$1c5,env1,$4,$e0,env1
-	equw $101,$cb00,$35e,env1,$1ab,env1,$0,$d3,env1
-	equw $101,$cb00,$32e,env1,$193,env1,$0,$c7,env1
-	equw $600,$0,$193,env2,$cb,env3,$0,env1,$5,$32a,env10
+	equw $100,$cb00,$383e,env4,$963,env1,$4ad,env1,$5,$254,env1
+	equw $101,$cb00,$8dc,env1,$46a,env1,$0,$233,env1
+	equw $101,$cb00,$85c,env1,$42a,env1,$0,$213,env1
+	equw $101,$cb00,$7e4,env1,$3ee,env1,$0,$1f5,env1
+	equw $101,$cb00,$773,env1,$3b5,env1,$0,$1d8,env1
+	equw $101,$cb00,$708,env1,$380,env1,$0,$1be,env1
+	equw $100,$0,$0,env4,$6a3,env1,$34d,env1,$0,$1a4,env1
+	equw $101,$0,$643,env1,$31d,env1,$0,$18c,env1
+	equw $101,$0,$5e9,env1,$2f0,env1,$0,$176,env1
+	equw $100,$cb00,$3842,env4,$594,env1,$2c6,env1,$4,$161,env1
+	equw $101,$cb00,$544,env1,$29e,env1,$0,$14d,env1
+	equw $101,$cb00,$4f9,env1,$278,env1,$0,$13a,env1
+	equw $101,$cb00,$4b1,env1,$254,env1,$0,$128,env1
+	equw $101,$cb00,$46e,env1,$233,env1,$0,$117,env1
+	equw $101,$cb00,$42e,env1,$213,env1,$0,$107,env1
+	equw $101,$cb00,$3f2,env1,$1f5,env1,$4,$f8,env1
+	equw $101,$cb00,$3b9,env1,$1d8,env1,$0,$ea,env1
+	equw $101,$cb00,$384,env1,$1be,env1,$0,$dd,env1
+	equw $600,$0,$1be,env2,$e1,env3,$0,env1,$5,$380,env10
 	equw $385,$0,$40
-	equw $600,$0,$197,env4,$65c,env11,$988,env11,$c0
-	equw $300,$0,$32e,env4,$cb9,env11,$1311,env11,$c0
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$988,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$0,$1c2,env4,$708,env11,$a89,env11,$c0
+	equw $300,$0,$384,env4,$e10,env11,$1512,env11,$c0
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$a89,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $301,$0,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$65c,env11,$988,env11,$c0
-	equw $381,$0,$0,env11,$81,$1973,env10
-	equw $604,$cb00,$32e6,env4,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$65c,env11,$988,env11,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $601,$0,$708,env11,$a89,env11,$c0
+	equw $381,$0,$0,env11,$81,$1c21,env10
+	equw $604,$cb00,$3842,env4,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$708,env11,$a89,env11,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $381,$0,$0,env3,$40
-	equw $600,$0,$197,env4,$65c,env11,$988,env11,$c0
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$18f,env1,$32a,env1,$5,$32a,env10
+	equw $600,$0,$1c2,env4,$708,env11,$a89,env11,$c0
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$1ba,env1,$380,env1,$5,$380,env10
 	equw $385,$0,$40
-	equw $600,$0,$197,env4,$32e,env1,$65c,env1,$0,$988,env10
-	equw $300,$0,$32e,env4,$65c,env1,$cb9,env1,$0,$1311,env10
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$65c,env11,$988,env11,$80,$0,env10
+	equw $600,$0,$1c2,env4,$384,env1,$708,env1,$0,$a89,env10
+	equw $300,$0,$384,env4,$708,env1,$e10,env1,$0,$1512,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$708,env11,$a89,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$cb00,$32e6,env4,$32a,env5,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$650,env11,$988,env11,$1,$32e2,env10
-	equw $380,$0,$32a,env6,$c7,env11,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $600,$cb00,$3842,env4,$380,env5,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$6fc,env11,$a89,env11,$1,$383e,env10
+	equw $380,$0,$380,env6,$dd,env11,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $385,$0,$40
-	equw $600,$0,$197,env4,$65c,env11,$988,env11,$c0
-	equw $300,$0,$32e,env4,$cb9,env11,$1311,env11,$c0
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$988,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$0,$1c2,env4,$708,env11,$a89,env11,$c0
+	equw $300,$0,$384,env4,$e10,env11,$1512,env11,$c0
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$a89,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $301,$0,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$65c,env11,$988,env11,$c0
-	equw $381,$0,$0,env11,$81,$1973,env10
-	equw $604,$cb00,$32e6,env4,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$65c,env11,$988,env11,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
+	equw $601,$0,$708,env11,$a89,env11,$c0
+	equw $381,$0,$0,env11,$81,$1c21,env10
+	equw $604,$cb00,$3842,env4,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$708,env11,$a89,env11,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
 	equw $381,$0,$0,env3,$40
-	equw $600,$0,$197,env4,$65c,env11,$988,env11,$c0
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$988,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $600,$0,$1c2,env4,$708,env11,$a89,env11,$c0
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$a89,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $301,$0,$0,env11,$0,env11,$80,$0,env10
-	equw $600,$0,$193,env12,$cb9,env13,$65c,env13,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$65c,env11,$988,env11,$80,$0,env10
+	equw $600,$0,$1be,env12,$e10,env13,$708,env13,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$708,env11,$a89,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$cb00,$32e6,env4,$32a,env5,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$650,env11,$988,env11,$1,$32e2,env10
-	equw $380,$0,$32a,env6,$c7,env11,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
-	equw $305,$0,$32e6,env1,$40
-	equw $605,$0,$4c44,env1,$40
-	equw $305,$0,$3c88,env1,$40
-	equw $604,$cb00,$32e6,env4,$0,env1,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$988,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
+	equw $600,$cb00,$3842,env4,$380,env5,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$6fc,env11,$a89,env11,$1,$383e,env10
+	equw $380,$0,$380,env6,$dd,env11,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
+	equw $305,$0,$3842,env1,$40
+	equw $605,$0,$544b,env1,$40
+	equw $305,$0,$42e7,env1,$40
+	equw $604,$cb00,$3842,env4,$0,env1,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$a89,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
 	equw $301,$0,$0,env11,$0,env11,$c0
-	equw $680,$0,$193,env12,$cb,env5,$5,$32a,env10
+	equw $680,$0,$1be,env12,$e1,env5,$5,$380,env10
 	equw $385,$0,$40
-	equw $601,$0,$65c,env11,$988,env11,$c0
-	equw $381,$0,$0,env11,$81,$1973,env10
-	equw $604,$cb00,$32e6,env4,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$65c,env11,$35ed,env3,$40
-	equw $304,$0,$32a,env6,$43f1,env3,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env3,$5,$32a,env10
+	equw $601,$0,$708,env11,$a89,env11,$c0
+	equw $381,$0,$0,env11,$81,$1c21,env10
+	equw $604,$cb00,$3842,env4,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$708,env11,$3b9a,env3,$40
+	equw $304,$0,$380,env6,$4b18,env3,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env3,$5,$380,env10
 	equw $381,$0,$0,env3,$40
-	equw $600,$0,$197,env4,$65c,env11,$988,env11,$c0
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$4c44,env11,$40
-	equw $604,$0,$197,env3,$0,env11,$81,$1973,env10
-	equw $301,$0,$0,env11,$559b,env1,$80,$0,env10
-	equw $600,$0,$193,env12,$cb,env5,$2622,env1,$5,$32a,env10
-	equw $385,$0,$1,$1e44,env10
-	equw $601,$0,$65c,env11,$988,env11,$80,$0,env10
+	equw $600,$0,$1c2,env4,$708,env11,$a89,env11,$c0
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$544b,env11,$40
+	equw $604,$0,$1c2,env3,$0,env11,$81,$1c21,env10
+	equw $301,$0,$0,env11,$5e9e,env1,$80,$0,env10
+	equw $600,$0,$1be,env12,$e1,env5,$2a25,env1,$5,$380,env10
+	equw $385,$0,$1,$2173,env10
+	equw $601,$0,$708,env11,$a89,env11,$80,$0,env10
 	equw $381,$0,$0,env11,$c0
-	equw $600,$cb00,$32e6,env4,$32a,env13,$322,env13,$5,$32a,env10
+	equw $600,$cb00,$3842,env4,$380,env13,$378,env13,$5,$380,env10
 	equw $384,$0,$0,env8,$40
 	equw $685,$0,$40
 	equw $385,$0,$40
-	equw $600,$0,$32a,env2,$197,env3,$193,env11,$5,$32a,env10
+	equw $600,$0,$380,env2,$1c2,env3,$1be,env11,$5,$380,env10
 	equw $385,$0,$40
-	equw $684,$0,$bf,env2,$c0
-	equw $300,$0,$654,env2,$65c,env3,$1311,env11,$c0
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$988,env11,$1,$1973,env10
-	equw $684,$0,$197,env3,$80,$0,env10
-	equw $301,$0,$0,env11,$2622,env11,$c0
-	equw $600,$0,$193,env12,$cb,env5,$0,env11,$5,$32a,env10
-	equw $305,$0,$2622,env11,$40
-	equw $601,$0,$65c,env11,$988,env11,$c0
-	equw $381,$0,$0,env11,$81,$1973,env10
-	equw $604,$cb00,$32e6,env4,$0,env11,$5,$32a,env10
-	equw $384,$0,$32a,env8,$c0
-	equw $600,$0,$197,env7,$65c,env11,$988,env11,$40
-	equw $384,$0,$32a,env6,$c0
-	equw $600,$0,$193,env2,$cb,env3,$0,env11,$5,$32a,env10
-	equw $381,$0,$0,env3,$1,$1973,env10
-	equw $600,$0,$197,env4,$65c,env11,$988,env11,$c0
-	equw $385,$0,$81,$1973,env10
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$988,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $684,$0,$d5,env2,$c0
+	equw $300,$0,$700,env2,$708,env3,$1512,env11,$c0
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$a89,env11,$1,$1c21,env10
+	equw $684,$0,$1c2,env3,$80,$0,env10
+	equw $301,$0,$0,env11,$2a25,env11,$c0
+	equw $600,$0,$1be,env12,$e1,env5,$0,env11,$5,$380,env10
+	equw $305,$0,$2a25,env11,$40
+	equw $601,$0,$708,env11,$a89,env11,$c0
+	equw $381,$0,$0,env11,$81,$1c21,env10
+	equw $604,$cb00,$3842,env4,$0,env11,$5,$380,env10
+	equw $384,$0,$380,env8,$c0
+	equw $600,$0,$1c2,env7,$708,env11,$a89,env11,$40
+	equw $384,$0,$380,env6,$c0
+	equw $600,$0,$1be,env2,$e1,env3,$0,env11,$5,$380,env10
+	equw $381,$0,$0,env3,$1,$1c21,env10
+	equw $600,$0,$1c2,env4,$708,env11,$a89,env11,$c0
+	equw $385,$0,$81,$1c21,env10
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$a89,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $301,$0,$0,env11,$0,env11,$80,$0,env10
-	equw $680,$cb00,$32e6,env4,$cb,env3,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$988,env11,$40
-	equw $684,$0,$197,env3,$81,$1973,env10
+	equw $680,$cb00,$3842,env4,$e1,env3,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$a89,env11,$40
+	equw $684,$0,$1c2,env3,$81,$1c21,env10
 	equw $301,$0,$0,env11,$0,env11,$80,$0,env10
-	equw $680,$cb00,$32e6,env4,$cb,env3,$5,$32a,env10
-	equw $300,$0,$0,env4,$65c,env11,$988,env11,$40
-	equw $600,$cb00,$32e6,env4,$cb,env3,$0,env11,$5,$32a,env10
-	equw $385,$cb00,$5,$32a,env10
-	equw $100,$0,$10f8,env1,$87e,env1,$43b,env1,$4,$21b,env1
-	equw $100,$0,$1004,env1,$804,env1,$3fe,env1,$0,$1fd,env1
-	equw $100,$0,$f1e,env1,$791,env1,$3c4,env1,$0,$1e0,env1
-	equw $100,$0,$e44,env1,$724,env1,$38e,env1,$0,$1c5,env1
-	equw $100,$0,$d77,env1,$6bd,env1,$35a,env1,$0,$1ab,env1
-	equw $100,$0,$cb5,env1,$65c,env1,$32a,env1,$0,$193,env1
-	equw $100,$0,$bfe,env1,$601,env1,$2fc,env1,$0,$17c,env1
-	equw $100,$0,$b52,env1,$5ab,env1,$2d1,env1,$0,$166,env1
-	equw $100,$0,$aaf,env1,$559,env1,$2a8,env1,$0,$152,env1
-	equw $100,$0,$a15,env1,$50c,env1,$282,env1,$0,$13f,env1
-	equw $100,$0,$984,env1,$4c4,env1,$25e,env1,$0,$12d,env1
-	equw $100,$0,$8fb,env1,$47f,env1,$23b,env1,$0,$11b,env1
-	equw $100,$0,$87a,env1,$43f,env1,$21b,env1,$0,$10b,env1
-	equw $100,$0,$800,env1,$402,env1,$1fd,env1,$0,$fc,env1
-	equw $100,$0,$78d,env1,$3c8,env1,$1e0,env1,$0,$ee,env1
-	equw $100,$0,$720,env1,$392,env1,$1c5,env1,$0,$e0,env1
-	equw $100,$0,$6b9,env1,$35e,env1,$1ab,env1,$0,$d3,env1
-	equw $100,$0,$658,env1,$32e,env1,$193,env1,$0,$c7,env1
+	equw $680,$cb00,$3842,env4,$e1,env3,$5,$380,env10
+	equw $300,$0,$0,env4,$708,env11,$a89,env11,$40
+	equw $600,$cb00,$3842,env4,$e1,env3,$0,env11,$5,$380,env10
+	equw $385,$cb00,$5,$380,env10
+	equw $100,$0,$12c2,env1,$963,env1,$4ad,env1,$4,$254,env1
+	equw $100,$0,$11b4,env1,$8dc,env1,$46a,env1,$0,$233,env1
+	equw $100,$0,$10b5,env1,$85c,env1,$42a,env1,$0,$213,env1
+	equw $100,$0,$fc5,env1,$7e4,env1,$3ee,env1,$0,$1f5,env1
+	equw $100,$0,$ee2,env1,$773,env1,$3b5,env1,$0,$1d8,env1
+	equw $100,$0,$e0c,env1,$708,env1,$380,env1,$0,$1be,env1
+	equw $100,$0,$d42,env1,$6a3,env1,$34d,env1,$0,$1a4,env1
+	equw $100,$0,$c83,env1,$643,env1,$31d,env1,$0,$18c,env1
+	equw $100,$0,$bcf,env1,$5e9,env1,$2f0,env1,$0,$176,env1
+	equw $100,$0,$b25,env1,$594,env1,$2c6,env1,$0,$161,env1
+	equw $100,$0,$a85,env1,$544,env1,$29e,env1,$0,$14d,env1
+	equw $100,$0,$9ee,env1,$4f9,env1,$278,env1,$0,$13a,env1
+	equw $100,$0,$95f,env1,$4b1,env1,$254,env1,$0,$128,env1
+	equw $100,$0,$8d8,env1,$46e,env1,$233,env1,$0,$117,env1
+	equw $100,$0,$858,env1,$42e,env1,$213,env1,$0,$107,env1
+	equw $100,$0,$7e0,env1,$3f2,env1,$1f5,env1,$0,$f8,env1
+	equw $100,$0,$76f,env1,$3b9,env1,$1d8,env1,$0,$ea,env1
+	equw $100,$0,$704,env1,$384,env1,$1be,env1,$0,$dd,env1
 	equw $a85,$0,$40
 	equw $a85,$0,$40
 	equw $a85,$0,$40

